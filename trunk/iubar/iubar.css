@@ -1,0 +1,84 @@
+a {
+	color: #990000;
+	text-decoration: underline;
+	}
+
+a:hover {
+	color: Blue;
+	text-decoration: underline;
+	}
+
+table { 
+	font-size: 13px;
+	text-align: left;
+	border-collapse: collapse;
+}
+	
+td {
+	vertical-align: top;
+	padding: 10px;
+	/*spacing: 10px;*/
+}
+
+input {color: #000000; font-family: tahoma;font-size: 9pt;} 
+
+
+h1 {
+	font-size: 40px;
+}
+
+h2 {
+	font-size: 30px;
+}
+
+body {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-style: normal;
+	font-size: x-small;
+	line-height: 21px;
+/*
+	font-variant: normal;
+	font-weight: normal;
+	font-size: medium;
+	word-spacing: normal;
+	letter-spacing: normal;
+	text-decoration: none;
+	text-transform: none;
+	text-align: left;
+	text-indent: 0ex;
+*/
+}
+
+img {
+	border: 0px;
+}
+ 
+.container {
+   position: relative;
+   height: 50px;
+   }
+
+.left-element {
+   position: absolute;
+   left: 0;
+   width: 50%;
+   }
+
+.right-element {
+   position: absolute;
+   right: 0;
+   width: 50%;
+   text-align: right; /* depends on element width */
+   } 
+
+.small1 {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-style: normal;
+	font-size: xx-small;
+	color: #777777;
+}
+
+.strong1 {
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: medium;
+}
