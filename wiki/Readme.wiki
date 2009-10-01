@@ -1,0 +1,10 @@
+#summary Backup and restore for any Hylafax or Avantfax systems.
+
+= Introduction =
+
+HylafaxBackup offers facilities to backup and restore files and data on any Hylafax or Avantfax installations. It offer statistic charts too.
+It's written in php,
+
+= Details =
+
+Please visit the [http://www.iubar.it/wiki/index.php?title=Hylafax_and_Avantfax_services project home page]
