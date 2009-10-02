@@ -1,5 +1,8 @@
 <?php
 
+
+// VERSION 00.00.22
+
 //error_reporting("E_ALL");
 //ini_set("error_reporting","E_ALL");
 ini_set("display_errors", "1");
@@ -143,27 +146,27 @@ function printZipInfo($archive){
 }
 
 function isFileOk($file){
-$nl = "<br />";
-$result = false;
-$b1 = false;
-$b2 = false;
+	$nl = "<br />";
+	$result = false;
+	$b1 = false;
+	$b2 = false;
 
-if (file_exists($file)){
-        //echo "Il file esiste" . $nl;
-	$b1 = true;
-}else{
-        echo "Il file " . $file . " NON esiste" . $nl;
-}
+	if (file_exists($file)){
+			//echo "Il file esiste" . $nl;
+		$b1 = true;
+	}else{
+			echo "Il file " . $file . " NON esiste" . $nl;
+	}
 
-if (is_readable($file)) {
-        //echo "File accessibile" . $nl;
-	$b2 = true;
-}else{
-        echo "File " . $file . " NON accessibile" . $nl;
-}
+	if (is_readable($file)) {
+			//echo "File accessibile" . $nl;
+		$b2 = true;
+	}else{
+			echo "File " . $file . " NON accessibile" . $nl;
+	}
 
-$result = $b1 && $b2;
-return $result;
+	$result = $b1 && $b2;
+	return $result;
 }
 
 function clearDirectory($path){
@@ -175,37 +178,6 @@ function clearDirectory($path){
 		}
 	}
 	return $result;
-}
-
-function checkVersion($v1, $v2){
-	// formato xx.xx.xx
-	$r = 0;
-	$right1 = ($v1[7] / 10000) +  ($v1[6] / 1000) + ($v1[4] / 100) +  ($v1[3] / 10);
-	$right2 = ($v2[7] / 10000) +  ($v2[6] / 1000) + ($v2[4] / 100) +  ($v2[3] / 10);
-	$left1 = ($v1[0] * 10) + $v1[1];
-	$left2 = ($v2[0] * 10) + $v2[1];
-
-	$ver1 = $left1 + $right1;
-	$ver2 = $left2 + $right2;
-
-	if(($ver1=="") && ($ver2>0)){
-		$r = 1;
-	}
-
-	if( ($ver1<$ver2) && ($ver1>0) && ($ver2>0) ) {
-		$r = 1;
-	}
-	return $r;
-}
-
-function needUpdate(){
-	include("version.php");
-	$b = false;
-	//echo "gui_version: " . $gui_version; // test
-	$b1 = checkVersion($gui_version, $gui_last_version);
-	$b2 = checkVersion($list_version, $list_last_version);
-	$b = $b1 || $b2;
-	return $b;
 }
 
 
@@ -281,32 +253,6 @@ function printArray($array){
 	}
 }
 
-function getUrl($url){
-	$url2 = $url;
-	$pos = strpos($url, "?");
-	if($pos>0){
-		$url2 = substr($url, 0 , $pos);
-	}
-
-	$last = $url2[strlen($url2)-1];
-	if($last=="/"){
-		$url2 = substr($url2, 0, strlen($url2)-1);
-	}
-
-	return $url2;
-}
-
-function getHostFromUrl($url){
-	$array = parse_url($url);
-	// $url['scheme'] = http
-	// $url['host'] = www.php.net
-	// $url['path'] = /download-php.php3
-	// $url['query'] = csel=br
-	$host = $array['host'];
-	//$host = str_replace("www.", "", $host);
-	return $host;
-}
-
 function csv2array2($filename, $limit=0, $sep=" "){
 	$row = 0;
 	$array = array();
@@ -358,15 +304,7 @@ function bool2text($b){
 	return $txt;
 }
 
-function getScriptPath(){
-	$path = "/";
-	$scriptname = $_SERVER["SCRIPT_FILENAME"];
-	$pos = strrpos($scriptname, "/");
-	if($pos!==FALSE){
-		$path = substr($scriptname, 0, $pos+1);
-	}
-	return $path;
-}
+
 
 function readConfig($pattern){
 	$str = "";
@@ -436,87 +374,5 @@ function writeConfig($pattern, $value){
 }
 
 
-function initBarChart($title, $funct_name, $div_name, $columns, $array, $color, $w, $h){
-	global $nl;
-?>
-
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["barchart"]});
-
-      google.setOnLoadCallback(drawChart_<?php echo $funct_name; ?>);
-
-      function drawChart_<?php echo $funct_name; ?>() {
-        var data = new google.visualization.DataTable();
-
-<?php
-	foreach ($columns as $key => $value){
-       	 echo "data.addColumn('$value', '$key');" . $nl;
-	}
-    echo "data.addRows(" . count($array) . ");" . $nl;
-	$i=0;
-	foreach ($array as $key => $value){
-       	 echo "data.setValue($i, 0, '$key');" . $nl;
-	     echo "data.setValue($i, 1, $value);" . $nl;
-		 $i++;
-	}
-?>
-
-        var options = {width: <?php echo $w; ?>, height: <?php echo $h; ?>, is3D: true, title: '<?php echo $title; ?>', colors: ['<?php echo $color; ?>']};
-
-        var chart = new google.visualization.BarChart(document.getElementById('chart_div_<?php echo $div_name; ?>'));
-        chart.draw(data, options);
-      }
-    </script>
-
-<?php
-
-}
-
-
-function initPieChart($title, $funct_name, $div_name, $columns, $array, $color, $w, $h){
-	global $nl;
-?>
-
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load('visualization', '1', {packages: ['piechart']});
-
-      google.setOnLoadCallback(drawChart_<?php echo $funct_name; ?>);
-
-function drawChart_<?php echo $funct_name; ?>() {
-  // Create and populate the data table.
-  var data = new google.visualization.DataTable();
-
-<?php
-	foreach ($columns as $key => $value){
-       	 echo "data.addColumn('$value', '$key');" . $nl;
-	}
-    echo "data.addRows(" . count($array) . ");" . $nl;
-	$i=0;
-	foreach ($array as $key => $value){
-       	 echo "data.setValue($i, 0, '$key');" . $nl;
-	     echo "data.setValue($i, 1, $value);" . $nl;
-		 $i++;
-	}
-?>
-
-	var options = {width: <?php echo $w; ?>, height: <?php echo $h; ?>, title: '<?php echo $title; ?>', is3D: true};
-       var chart = new google.visualization.PieChart(document.getElementById('chart_div_<?php echo $div_name; ?>'));
-
-	// Create and draw the visualization.
-  	chart.draw(data, options);
-}
-
-</script>
-
-<?php
-
-
-}
-
-function printChart($funct_name){
-	echo "<div id=\"chart_div_" . $funct_name . "\"></div>";
-}
 
 ?>
