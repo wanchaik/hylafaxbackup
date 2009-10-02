@@ -17,7 +17,7 @@ $brnl = $br . "\r\n";
 $config = new config();
 $app = new app();
 
-printHeader("hylafaxBackup");
+printHeaderWithLogo($app->project_name, $app->project_name, "hd2-backup.png");
 
 $action = "default";
 if(isset($_REQUEST["action"])){

@@ -53,21 +53,36 @@ img {
 	border: 0px;
 }
  
+#appname {
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 40px;
+   	position: absolute;
+   	left: 135;	
+   	top: 50;
+	color: #777777;
+	
+} 
+#applogo {
+   	position: absolute;
+   	left: 10;	
+   	top: 10;
+} 
+
 .container {
    position: relative;
-   height: 50px;
+   height: 130px;
    }
 
 .left-element {
    position: absolute;
    left: 0;
-   width: 50%;
+   width: 70%;
    }
 
 .right-element {
    position: absolute;
    right: 0;
-   width: 50%;
+   width: 30%;
    text-align: right; /* depends on element width */
    } 
 

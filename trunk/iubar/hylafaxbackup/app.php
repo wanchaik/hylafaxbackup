@@ -6,7 +6,7 @@ class app {
 
 	public $project_name = "hylafaxBackup";
 	public $project_home = "http://code.google.com/p/hylafaxbackup/";
-	public $hylafax_support = "http://www.iubar.it/wiki/index.php?title=HylafaxServices";
+	public $hylafax_support = "http://www.iubar.it/wiki/index.php?title=Hylafax_and_Avantfax_services";
 	public $version = "00.02.00";
 	public $version_date = "31/09/2009";
 	public $url_update = "http://www.iubar.it/updates/hylafaxbackup/version.txt";
