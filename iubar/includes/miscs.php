@@ -8,18 +8,20 @@
 ini_set("display_errors", "1");
 error_reporting(E_ALL);
 
-function printHeader($title, $option=0){
-
-
-	$index = "index.php";
-
-
+function initHeader($page_title){
 	echo "<html>";
 	echo "<header>";
-	echo "<title>" . $title . "</title>";
+	echo "<title>" . $page_title . "</title>";
 	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"/iubar/iubar.css\" />";
 	echo "</header>";
 	echo "<body>";
+}
+
+function printHeader($page_title, $option=0){
+
+	$index = "index.php";
+
+	initHeader($page_title);
 
 	echo "<div class=\"container\">";
 
@@ -40,6 +42,41 @@ function printHeader($title, $option=0){
 	echo "</div>";
 	// echo "<hr />";
 	echo "<p> </p>";
+
+}
+
+function printHeaderWithLogo($page_title, $app_name, $img, $option=0){
+
+	$index = "index.php";
+
+	initHeader($page_title);
+
+	echo "<div class=\"container\">";
+
+		echo "<div class=\"left-element\">";
+
+		echo "<span id=\"applogo\" class=\"applogo\">";
+		echo "<img alt=\"" . $app_name . "\" src=\"/iubar/img/" . $img . "\" /></span>";
+		echo "<span id=\"appname\" class=\"appname\">";
+		echo "$app_name</span>";
+
+		echo "</div>";
+
+		echo "<div class=\"right-element\">";
+		if($option==1){
+			echo "<a href=\"/index.php\">Vai al menu</a>";
+		}
+		if($option==1){
+			echo "<a href=\"/" . $index . "\"><img alt=\"logo_iubar\" src=\"/iubar/img/logo.gif\" /></a>";
+		}else{
+			echo "<img alt=\"logo_iubar\" src=\"/iubar/img/logo.gif\" />";
+		}
+		echo "</div>";
+
+	echo "</div>";
+	// echo "<hr />";
+
+	echo "<p></p>";
 
 }
 
