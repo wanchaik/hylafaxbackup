@@ -19,6 +19,8 @@ $app = new app();
 
 printHeaderWithLogo($app->project_name, $app->project_name, "hd2-backup.png");
 
+echo "<hr />";
+
 $action = "default";
 if(isset($_REQUEST["action"])){
 	$action = $_REQUEST["action"];
@@ -64,17 +66,23 @@ function restore(){
 	global $config, $brnl;
 	$continue = check1();
 	if($continue){
-		$out = get_files();
-		echo "Output message: " . $out . $brnl;
+		$out1 = get_files();
+		if($out1!=""){
+			echo "Output message: " . $out1 . $brnl;
+		}
 		$b1 = file_exists($app->fs_local_file);
 		if($b1){
-			decompress_files();
-			$b3 = $config->db_dump;
+			$out_array = decompress_files();
+			printOutArray($out_array);
+			$b3 = $config->avantfax_db_dump;
 			if($b3){
 				// restore mysql data...
 				restore_db();
 			}
-			delAllTempFiles();
+			$out3 = delAllTempFiles();
+			if($out2!=""){
+				echo "Output message: " . $out2 . $brnl;
+			}
 		}else{
 			echo "Error: getting files" . $brnl;
 		}
@@ -87,17 +95,32 @@ function backup(){
 	global $config, $brnl;
 	$continue = check2();
 	if($continue){
-		$b2 = $config->db_dump;
+		$b2 = $config->avantfax_db_dump;
 		if($b2){
 			// backup mysql
 			backup_db();
 		}
-		compress_files();
-		$out = put_files();
-		echo "Output message: " . $out . $brnl;
-		delAllTempFiles();
+		$out_array = compress_files();
+		printOutArray($out_array);
+		$out2 = put_files();
+		if($out2!=""){
+			echo "Output message: " . $out2 . $brnl;
+		}
+		$out3 = delAllTempFiles();
+		if($out2!=""){
+			echo "Output message: " . $out2 . $brnl;
+		}
 	}else{
 		echo "Error: backup process could not start" . $brnl;
+	}
+}
+
+function printOutArray($out_array){
+	global $brnl;
+	foreach($out_array as $out){
+		if($out!=""){
+			echo "Output message: " . $out . $brnl;
+		}
 	}
 }
 
@@ -130,20 +153,24 @@ function compress_files() {
 	global $config, $app;
 	// Compress files to /temp dir....
 	$filename = $app->fs_local_file;
-	$cmd1 = "tar -czf " . $filename . " " . $config->hylafax_recvq_path;	// hylafax
-	$cmd2 = "tar -rzf " . $filename . " " . $config->hylafax_sendq_path;	// hylafax
-	$cmd3 = "tar -rzf " . $filename . " " . $config->avantfax_recvd_dir;	// avantfax
-	$cmd4 = "tar -rzf " . $filename . " " . $config->avantfax_sent_dir;		// avantfax
-	$out1 = shell_exec($cmd1);
-	$out2 = shell_exec($cmd2);
-	$out3 =	shell_exec($cmd3);
-	$out4 = shell_exec($cmd4);
 	$array = array();
-	$array[] = $out1;
-	$array[] = $out2;
-	$array[] = $out3;
-	$array[] = $out4;
-	return $out;
+	if($config->hylafax_file_backup){
+		$cmd1 = "tar -czf " . $filename . " " . $config->hylafax_recvq_path;	// hylafax
+		$cmd2 = "tar -rzf " . $filename . " " . $config->hylafax_sendq_path;	// hylafax
+		$out1 = shell_exec($cmd1);
+		$out2 = shell_exec($cmd2);
+		$array[] = $out1;
+		$array[] = $out2;
+	}
+	if($config->avantfax_file_backup){
+		$cmd3 = "tar -rzf " . $filename . " " . $config->avantfax_recvd_dir;	// avantfax
+		$cmd4 = "tar -rzf " . $filename . " " . $config->avantfax_sent_dir;		// avantfax
+		$out3 =	shell_exec($cmd3);
+		$out4 = shell_exec($cmd4);
+		$array[] = $out3;
+		$array[] = $out4;
+	}
+	return $array;
 }
 
 function get_files(){
@@ -382,6 +409,8 @@ function printConfig(){
 function printMenu(){
 ?>
 
+<div class="clear" />
+
 <hr />
 
 <h2>Menu</h2>
@@ -401,14 +430,17 @@ function printMenu(){
 function printMenu2(){
 ?>
 
-<hr />
 
 <h2>Actions</h2>
 
-<ul>
-<li><a href="?action=backup">Start backup now</a></li>
-<li><a href="?action=restore">Start restore now</a></li>
-</ul>
+<div>
+<div class="backup_actions">
+<span id="backup_button" class="button"><a href="?action=backup"><img src="../img/backup.jpg" alt="backup" /><br />Start backup now</a></span>
+<span id="restore_button" class="button"><a href="?action=restore"><img src="../img/restore.jpg" alt="restore" /><br />Start restore now</a></span>
+</div>
+</div>
+
+<p> </p>
 
 <?php
 }
