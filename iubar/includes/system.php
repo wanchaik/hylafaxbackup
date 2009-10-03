@@ -17,10 +17,9 @@ function getLinuxVersion(){
 }
 
 function getPathFromFile($fullfilename){
-	$tokens = explode("/", $fullfilename);
-	$index = count($tokens)-1;
-	$path = $tokens[$index];
-	return $path;
+	//$file = basename($fullfilename);
+	$dir = dirname($fullfilename);
+	return $dir;
 }
 
 function getLanIp(){
