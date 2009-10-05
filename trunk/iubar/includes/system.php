@@ -7,19 +7,26 @@ function getWebServerVersion(){
 }
 
 function getLinuxVersion(){
+
 	$ver = "unknown";
 	$cmd = "uname -sr";
 	$out = shell_exec($cmd);
 	$cmd2 = "cat /etc/*elease*";
 	$out2 = shell_exec($cmd2);
 	$ver = $out . " - " . $out2;
+
+	//$cmd3 = "head -n1 /etc/issue";
+	//$out3 = shell_exec($cmd);
+
 	return $ver;
 }
 
 function getPathFromFile($fullfilename){
-	//$file = basename($fullfilename);
-	$dir = dirname($fullfilename);
-	return $dir;
+	//$path = "/home/httpd/html/index.php";
+	//$file = basename($path);         // $file is set to "index.php"
+	//$file = basename($path, ".php"); // $file is set to "index"
+	$path = dirname($fullfilename);
+	return $path;
 }
 
 function getLanIp(){
@@ -71,5 +78,27 @@ function getHostFromUrl($url){
 	return $host;
 }
 
+function getCpuModel(){
+	$cmd = "grep \"model name\" /proc/cpuinfo";
+	$out = shell_exec($cmd);
+	$array = explode("\r", $out);
+	$line = $array[0];
+	return $line;
+}
+
+function getLastTimeReboot(){
+	$cmd = "last reboot";
+	$out = shell_exec($cmd);
+	$array = explode("\n", $out);
+	$first_line = trim($array[0]);
+	$array2 = explode(" ", $first_line);
+	$index = count($array2);
+	//$a = $index-4;
+	//$b = $index-3;
+	//$c = $index-2;
+	//$d = $index-1;
+	//$d = $array2[$a] . " " . $array2[$b] . " " . $array2[$c];// . " " . $array2[$index-1];
+	return $first_line;
+}
 
 ?>
