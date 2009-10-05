@@ -28,25 +28,30 @@ if(isset($_REQUEST["action"])){
 
 if($action == "saveconfig"){
 	saveconfig();
-	echo "Config saved.";
+	printOut("Config saved.", "A");
 } else if($action == "config"){
 	printConfig();
 } else if($action == "update"){
 	printUpdate();
 } else if($action == "stats"){
 	printStats();
+} else if($action == "logs"){
+	printLogs();
 } else if($action == "operations"){
 	printMenu2();
 } else if($action == "backup"){
 	backup();
-	echo "Backup done.";
+	printOut("Backup done.", "A");
 } else if($action == "restore"){
 	restore();
-	echo "Restore done.";
+	printOut("Restore done.", "A");
 } else if($action == "support"){
 	printSponsor();
 } else if($action == "main"){
 	printMain();
+} else if($action == "chmod"){
+	$out = chmodLogFiles();
+	echo "<p>Hylafax log files permissions changed. Now you can read the hylafax log files from this web application</p>";
 } else {
 	printMain();
 }
@@ -59,59 +64,211 @@ printFooter2($app->project_name . " (ver " . $app->version . ")", $app->project_
 // #################################################################
 
 function saveconfig() {
-	echo "TODO: function not ready in this version, please edit the file config.php";
+	printOut("TODO: function not ready in this version, please edit the file config.php", "W");
 }
 
-function restore(){
+
+function printLogs(){
 	global $config, $brnl;
-	$continue = check1();
-	if($continue){
-		$out1 = get_files();
-		if($out1!=""){
-			echo "Output message: " . $out1 . $brnl;
+	$id  = "";
+	if(isset($_REQUEST["logfile"])){
+		$id = $_REQUEST["logfile"];
+	}
+
+	//echo "id: " . $id . $brnl;
+
+	$path = $config->hylafax_log_path;
+
+	if (is_readable($path)) {
+		//echo "The path $path is readable" . $brnl;
+	} else {
+		echo "The path $path is not readable" . $brnl;
+	}
+
+	if (is_dir($path)) {
+		$i = 0;
+		echo "<p>Selezionare il file di log da analizzare</p>";
+		echo "<form name=\"input\" action=\"#\" method=\"post\">";
+		//echo "<label for=\"field_log\">File di log: </label>";
+		echo "<select id=\"field_log\" name=\"logfile\" size=\"5\">";
+		$dh = opendir($path);
+		if ($dh) {
+			while (($file = readdir($dh)) !== false) {
+				//echo "filename: $file : filetype: " . filetype($path . $file) . "\n";
+				if(is_file($path . "/" . $file)){
+					$i++;
+					echo "<option value=\"" . $file . "\">" . $file . "</option>";
+				}else{
+				 	//
+				}
+
+			}
+			closedir($dh);
 		}
-		$b1 = file_exists($app->fs_local_file);
+		echo "</select>";
+		echo "<p><input type=\"submit\" value=\"Visualizza\" /></p>";
+		echo "</form>";
+	}
+
+
+	if($id!=""){
+		$content = "";
+		$filename = $path . "/" . $id;
+		if(is_readable($filename)){
+			$f = fopen($filename, "r");
+			while ( $line = fgets($f, 1000) ) {
+				$content = $content . $line;
+			}
+
+			echo "<div>";
+			echo "<textarea name=\"log\" cols=\"100\" rows=\"20\">";
+			echo $content;
+			echo "</textarea>";
+			echo "</div>";
+		}else{
+			echo "File $filename is not readable" . $brnl;
+		}
+
+		//echo "<p><a href=\"?action=chmod\">Modifica autorizzazioni</a></p>";
+
+	}
+}
+
+
+function chmodLogFiles(){
+	global $config;
+	$path = $config->hylafax_log_path . "/*";
+	$cmd1 = "chmod 777 " . $path;
+	printOut("Eseguo: " . $cmd1, "A");
+	$out1 = shell_exec($cmd1);
+	printOutShell($cmd1, $out1);
+	return $out1;
+}
+
+
+function restore(){
+	global $config;
+	if(($config->hylafax_fax_backup) || ($config->avantfax_fax_backup)){
+		printOut("restoring fax...", "A");
+		restore_fax();
+	}
+	if(($config->hylafax_config_backup) || ($config->avantfax_config_backup)){
+		printOut("restoring config...", "A");
+		restore_config();
+	}
+
+}
+
+
+function backup(){
+	global $config;
+	if(($config->hylafax_fax_backup) || ($config->avantfax_fax_backup)){
+		printOut("backuping fax...", "A");
+		backup_fax();
+	}
+	if(($config->hylafax_config_backup) || ($config->avantfax_config_backup)){
+		printOut("backuping config...", "A");
+		backup_config();
+	}
+}
+
+
+function restore_config(){
+	global $app, $config;
+	$continue = check1($config->fs_remote_file_config, $config->ftp_file_config);
+	if($continue){
+		$out1 = get_files($app->fs_local_file_config, $config->fs_remote_file_config, $config->ftp_file_config);
+		if($out1!=""){
+			printOut($out1, "R");
+		}
+		$b1 = file_exists($app->fs_local_file_config);
 		if($b1){
-			$out_array = decompress_files();
+			$out_array = decompress_files($app->fs_local_file_config);
+			printOutArray($out_array);
+			$out3 = delAllTempFiles($app->fs_local_file_config);
+			if($out3!=""){
+				printOut("Output message: " . $out3, "R");
+			}
+		}else{
+			printOut("files $app->fs_local_file_config doesn't exist", "E");
+		}
+	}else{
+		printOut("restore process could not start", "E");
+	}
+}
+
+function restore_fax(){
+	global $app, $config;
+	$continue = check1($config->fs_remote_file_fax, $config->ftp_file_fax);
+	if($continue){
+		$out1 = get_files($app->fs_local_file_fax, $config->fs_remote_file_fax, $config->ftp_file_fax);
+		if($out1!=""){
+			printOut($out1, "R");
+		}
+		$b1 = file_exists($app->fs_local_file_fax);
+		if($b1){
+			$out_array = decompress_files($app->fs_local_file_fax);
 			printOutArray($out_array);
 			$b3 = $config->avantfax_db_dump;
 			if($b3){
 				// restore mysql data...
 				restore_db();
 			}
-			$out3 = delAllTempFiles();
+			$out3 = delAllTempFiles($app->fs_local_file_fax);
 			if($out2!=""){
-				echo "Output message: " . $out2 . $brnl;
+				printOut($out3, "R");
 			}
 		}else{
-			echo "Error: getting files" . $brnl;
+			printOut("files $app->fs_local_file_fax doesn't exist", "E");
 		}
 	}else{
-		echo "Error: restore process could not start" . $brnl;
+		printOut("restore process could not start", "E");
 	}
 }
 
-function backup(){
-	global $config, $brnl;
-	$continue = check2();
+
+
+function backup_config(){
+	global $app, $config;
+	$continue = check2($config->fs_remote_file_config);
+	if($continue){
+		$out_array = compress_files("config");
+		printOutArray($out_array);
+		$out2 = put_files($app->fs_local_file_config, $config->fs_remote_file_config, $config->ftp_file_config);
+		if($out2!=""){
+			printOut($out3, "R");
+		}
+		$out3 = delAllTempFiles($app->fs_local_file_config);
+		if($out3!=""){
+			printOut($out3, "R");
+		}
+	}else{
+		printOut("backup process could not start", "E");
+	}
+}
+
+function backup_fax(){
+	global $app, $config;
+	$continue = check2($config->fs_remote_file_fax);
 	if($continue){
 		$b2 = $config->avantfax_db_dump;
 		if($b2){
 			// backup mysql
 			backup_db();
 		}
-		$out_array = compress_files();
+
+		$out_array = compress_files("fax");
 		printOutArray($out_array);
-		$out2 = put_files();
+		$out2 = put_files($app->fs_local_file_fax, $config->fs_remote_file_fax, $config->ftp_file_fax);
 		if($out2!=""){
-			echo "Output message: " . $out2 . $brnl;
+			printOut($out2, "R");
 		}
-		$out3 = delAllTempFiles();
-		if($out2!=""){
-			echo "Output message: " . $out2 . $brnl;
+		$out3 = delAllTempFiles($app->fs_local_file_fax);
+		if($out3!=""){
+			printOut($out3, "R");
 		}
 	}else{
-		echo "Error: backup process could not start" . $brnl;
+		printOut("backup process could not start", "E");
 	}
 }
 
@@ -119,29 +276,28 @@ function printOutArray($out_array){
 	global $brnl;
 	foreach($out_array as $out){
 		if($out!=""){
-			echo "Output message: " . $out . $brnl;
+			printOut($out, "R");
 		}
 	}
 }
 
 // ##################################################################
 
-function delAllTempFiles(){
-	global $config, $app;
-	$filename = $app->fs_local_file;
+function delAllTempFiles($filename){
 	$cmd1 = "rm -f " . $filename;
 	$out1 = shell_exec($cmd1);
+	printOutShell($cmd1, $out1);
 	return $out1;
 }
 
-function decompress_files() {
+function decompress_files($filename) {
 	global $config, $app;
-	$filename = $app->fs_local_file;
 	// Decompess archive to /temp folder
-	$cmd1 = "cd /";
+	$cmd1 = "cd /tmp";
 	$cmd2 = "tar -xzvf " . $filename;
 	$out1 = shell_exec($cmd1);
 	$out2 = shell_exec($cmd2);
+	printOutShell($cmd2, $out2);
 	$array = array();
 	$array[] = $out1;
 	$array[] = $out1;
@@ -149,38 +305,85 @@ function decompress_files() {
 	return $out;
 }
 
-function compress_files() {
-	global $config, $app;
+function compress_files($option) {
+	global $config, $app, $brnl;
 	// Compress files to /temp dir....
-	$filename = $app->fs_local_file;
+
+	printOut("compressing...($option)", "A");
+
 	$array = array();
-	if($config->hylafax_file_backup){
-		$cmd1 = "tar -czf " . $filename . " " . $config->hylafax_recvq_path;	// hylafax
-		$cmd2 = "tar -rzf " . $filename . " " . $config->hylafax_sendq_path;	// hylafax
-		$out1 = shell_exec($cmd1);
-		$out2 = shell_exec($cmd2);
-		$array[] = $out1;
-		$array[] = $out2;
+
+
+	if($option=="config"){
+
+
+		$n1 = count($config->hylafax_config_files);
+		$n3 = count($config->avantfax_config_files);
+
+		printOut("Hylafax config files or dirs to backup: " .$n1, "A");
+		printOut("Avantfax config files or dirs to backup: " .$n3, "A");
+
+		foreach($config->hylafax_config_files as $f){
+			$out1 = compress_file($f, $app->fs_local_file_config);
+			$array[] = $out1;
+		}
+
+		foreach($config->avantfax_config_files as $f){
+			$out3 = compress_file($f, $app->fs_local_file_config);
+			$array[] = $out3;
+		}
+
+	}else if($option=="fax"){
+
+		$n2 = count($config->hylafax_data_files);
+		$n4 = count($config->avantfax_data_files);
+
+		printOut("Hylafax data files or dirs to backup: " .$n2, "R");
+		printOut("Avantfax config files or dirs to backup: " .$n4, "R");
+
+		foreach($config->hylafax_data_files as $f){
+			$out2 = compress_file($f, $app->fs_local_file_fax);
+			$array[] = $out2;
+		}
+
+		foreach($config->avantfax_data_files as $f){
+			$out4 = compress_file($f, $app->fs_local_file_fax);
+			$array[] = $out4;
+		}
+	} else {
+		printOut("Invalid option " .$option, "E");
 	}
-	if($config->avantfax_file_backup){
-		$cmd3 = "tar -rzf " . $filename . " " . $config->avantfax_recvd_dir;	// avantfax
-		$cmd4 = "tar -rzf " . $filename . " " . $config->avantfax_sent_dir;		// avantfax
-		$out3 =	shell_exec($cmd3);
-		$out4 = shell_exec($cmd4);
-		$array[] = $out3;
-		$array[] = $out4;
-	}
+
 	return $array;
 }
 
-function get_files(){
+function compress_file($f, $filename){
+	$out1 = "";
+	if(($f!="") && (file_exists($f))){
+		$params = getTarParamsAdd($filename);
+		$cmd1 = "tar " . $params . " " . $filename . " " . $f;
+		$out1 = shell_exec($cmd1);
+		printOutShell($cmd1, $out1);
+	}else{
+		printOut("file $f not found", "E");
+	}
+	return $out1;
+}
+
+function getTarParamsAdd($filename){
+	$param = "-czf";
+	if(file_exists($filename)){
+		$param = "-rzf";
+	}
+	return $param;
+}
+
+function get_files($local_file, $remote_file, $server_file){
 	global $config, $app;
 	$out = "";
 	$use_ftp = $config->use_ftp;
-	$local_file = $app->fs_local_file;
 	if($use_ftp){
 		// get from ftp to /temp
-		$remote_file = $config->ftp_file;
 		$ftp_server = $config->ftp_path;
 		$ftp_user_name = $config->ftp_user;
 		$ftp_user_pass = $config->ftp_pass;
@@ -189,7 +392,6 @@ function get_files(){
 		closeFtp($conn_id);
 	}else{
 		// copy from path to /temp
-		$remote_file = $config->fs_remote_file;
 		$cmd = "cp " . $remote_file . " " . $local_file;
 		$out = shell_exec($cmd);
 	}
@@ -201,15 +403,13 @@ function get_files(){
 	return $out;
 }
 
-function put_files(){
+function put_files($local_file, $remote_file, $server_file){
 	global $config, $app;
 	$out = "";
 	$use_ftp = $config->use_ftp;
-	$local_file = $app->fs_local_file;
 	if (file_exists($local_file)){
 		if($use_ftp){
 			// put from /temp to ftp
-			$server_file = $config->ftp_file;
 			$ftp_server = $config->ftp_path;
 			$ftp_user_name = $config->ftp_user;
 			$ftp_user_pass = $config->ftp_pass;
@@ -218,7 +418,6 @@ function put_files(){
 			closeFtp($conn_id);
 		}else{
 			// copy from /temp to path
-			$remote_file = $config->fs_remote_file;
 			$cmd = "cp " . $local_file . " " . $remote_file;
 			$out = shell_exec($cmd);
 		}
@@ -245,23 +444,22 @@ function restore_db(){
 }
 
 
-function check1() {
-	global $config, $brnl;
+function check1($fs_remote_file, $ftp_file) {
+	global $config;
 	if (!($config->use_ftp)) {
 		// check if file to restore is present.....
-		$file = $config->fs_remote_file;
 		$b1 = false;
 		$b2 = false;
-		if (file_exists($file)){
+		if (file_exists($fs_remote_file)){
 			$b1 = true;
 		}else{
-			echo "File $file not found" . $brnl;
+			printOut("File $fs_remote_file not found", "E");
 		}
 		if($b1){
-			if (is_readable($file)) {
+			if (is_readable($fs_remote_file)) {
 				$b2 = true;
 			}else{
-				echo "File $file not readable" . $brnl;
+				printOut("File $fs_remote_file not readable", "E");
 			}
 		}
 		$continue = $b1 && $b2;
@@ -272,10 +470,9 @@ function check1() {
 		$pass = $config->ftp_pass;
 		$b3 = checkIfFtpReady($host, $user, $pass);
 		if($b3){
-			$ftp_file = $config->ftp_file;
 			$continue = checkIfFileExist($host, $user, $pass, $ftp_file);
 			if(!$continue){
-				echo "Error: cant't find the file $ftp_file on $host" . $brnl;
+				printOut("Error: cant't find the file $ftp_file on $host", "E");
 			}
 		}else{
 			//echo "Error: ftp server $host is not ready" . $brnl;
@@ -284,23 +481,23 @@ function check1() {
 	return $continue;
 }
 
-function check2() {
-	global $config, $brnl;
+function check2($filename) {
+	global $config;
 	if (!($config->use_ftp)) {
 		// check if backup path is present.....
-		$path = getPathFromFile($config->fs_remote_file);
+		$path = getPathFromFile($filename);
 		$b1 = false;
 		$b2 = false;
 		if (file_exists($path)){
 			$b1 = true;
 		}else{
-			echo "Path $path not found" . $brnl;
+			printOut("Path $path not found", "E");
 		}
 		if($b1){
 			if (is_readable($path)) {
 				$b2 = true;
 			}else{
-				echo "Path $path not readable" . $brnl;
+				printOut("Path $path not readable", "E");
 			}
 		}
 		$continue = $b1 && $b2;
@@ -349,7 +546,8 @@ global $brnl;
 	$last_fax_on_db = getLastFaxOnDb();
 	$last_fax_on_disk1 = getLastFaxOnDisk1();
 	$last_fax_on_disk2 = getLastFaxOnDisk2();
-	$last_backup = getLastBackup();
+	$last_backup_fax = getLastBackup("fax");
+	$last_backup_config = getLastBackup("config");
 
 	echo "Welcome to <b>hylafaxBackup</b>" . $brnl;
 	echo "now is: " . $now . $brnl;
@@ -360,7 +558,8 @@ global $brnl;
 	echo "last received fax on db: " . $last_fax_on_db . $brnl;
 	echo "last received fax on disk (hylafax): " . $last_fax_on_disk1 . $brnl;
 	echo "last received fax on disk (avantfax): " . $last_fax_on_disk2 . $brnl;
-	echo "last backup: " . $last_backup . $brnl;
+	echo "last faxes backup: " . $last_backup_fax . $brnl;
+	echo "last config backup: " . $last_backup_config . $brnl;
 
 } // end main
 
@@ -381,9 +580,11 @@ function printConfig(){
 <form name="myform" action="#?action=saveconfig" method="post">
 
 <h3>Options</h3>
-<label for="field11"></label><input id="field11" type="checkbox" name="avantfax_db_dump" <?php bool2checked($config->avantfax_db_dump); ?> disabled="disabled" />Database dump<br />
-<label for="field12"></label><input id="field12" type="checkbox" name="hylafax_file_backup" <?php bool2checked($config->hylafax_file_backup); ?> disabled="disabled" />Hylafax file (fax) backup<br />
-<label for="field13"></label><input id="field13" type="checkbox" name="avantfax_file_backup" <?php bool2checked($config->avantfax_file_backup); ?> disabled="disabled" />Avantfax file (fax) backup<br />
+<label for="field11"></label><input id="field11" type="checkbox" name="hylafax_config_backup" <?php bool2checked($config->hylafax_config_backup); ?> disabled="disabled" />Hylafax config backup<br />
+<label for="field12"></label><input id="field12" type="checkbox" name="hylafax_fax_backup" <?php bool2checked($config->hylafax_fax_backup); ?> disabled="disabled" />Hylafax fax backup<br />
+<label for="field13"></label><input id="field13" type="checkbox" name="avantfax_config_backup" <?php bool2checked($config->avantfax_config_backup); ?> disabled="disabled" />Avantfax config backup<br />
+<label for="field14"></label><input id="field14" type="checkbox" name="avantfax_db_dump" <?php bool2checked($config->avantfax_db_dump); ?> disabled="disabled" />Avantfax data (db) dump<br />
+<label for="field15"></label><input id="field15" type="checkbox" name="avantfax_fax_backup" <?php bool2checked($config->avantfax_fax_backup); ?> disabled="disabled" />Avantfax fax backup<br />
 
 <h3>Db Authentication</h3>
 <label for="field30">Db host: </label><input id="field30" type="text" name="db_host" value="<?php echo $config->db_host; ?>" disabled="disabled" /><br />
@@ -392,12 +593,15 @@ function printConfig(){
 
 <h3>Target</h3>
 <label for="field21"></label><input id="field21" type="radio" name="group1" value="fs" <?php bool2checked(!$config->use_ftp); ?> />Use file system (external storage, pen drive, samba folder<br />
-<label for="field2">Path and file name: </label><input id="field2" type="text" name="fs_remote_file" value="<?php echo $config->fs_remote_file; ?>" disabled="disabled" /><br />
+<label for="field2">Target filename for fax and data: </label><input id="field2" type="text" name="fs_remote_file_fax" value="<?php echo $config->fs_remote_file_fax; ?>" disabled="disabled" /><br />
+<label for="field3">Target filename for config: </label><input id="field2" type="text" name="fs_remote_file_config" value="<?php echo $config->fs_remote_file_config; ?>" disabled="disabled" /><br />
+
 <label for="field22"></label><input id="field22" type="radio" name="group1" value="ftp" <?php bool2checked($config->use_ftp); ?> />Use ftp server<br />
 <label for="field5">Ftp host: </label><input id="field5" type="text" name="ftp_host" value="<?php echo $config->ftp_host; ?>" /><br />
 <label for="field6">Ftp user: </label><input id="field6" type="text" name="ftp_user" value="<?php echo $config->ftp_user; ?>" /><br />
 <label for="field7">Ftp password: </label><input id="field7" type="text" name="ftp_pass" value="<?php echo $config->ftp_pass; ?>" /><br />
-<label for="field8">Ftp remote file: </label><input id="field8" type="text" name="ftp_file" value="<?php echo $config->ftp_file; ?>" disabled="disabled" /><br />
+<label for="field8">Ftp remote file for fax and data: </label><input id="field8" type="text" name="ftp_file_fax" value="<?php echo $config->ftp_file_fax; ?>" disabled="disabled" /><br />
+<label for="field9">Ftp remote file for config: </label><input id="field8" type="text" name="ftp_file_config" value="<?php echo $config->ftp_file_config; ?>" disabled="disabled" /><br />
 <input type="submit" value="Save" /><br />
 
 </form>
@@ -418,6 +622,7 @@ function printMenu(){
 <ul>
 <li><a href="?action=stats">Avantfax statistics</a></li>
 <li><a href="?action=operations">Backup/Restore</a></li>
+<li><a href="?action=logs">Hyalfax log files</a></li>
 <li><a href="?action=config">Configuration</a></li>
 <li><a href="?action=update">Check if a new version is available</a></li>
 <li><a href="?action=support">Request tech support</a></li>
@@ -531,7 +736,7 @@ function getLastFaxOnDisk1(){
 	if (file_exists($filename)) {
 		$str = $filename . " " . date (getDateFormat(), filemtime($filename));
 	}else{
-		$str = "file unknown: " . $filename;
+		$str = "no files found";
 	}
 	return $str;
 }
@@ -544,23 +749,35 @@ function getLastFaxOnDisk2(){
 	if (file_exists($filename)) {
 		$str = $filename . " " . date (getDateFormat(), filemtime($filename));
 	}else{
-		$str = "file unknown: " . $filename;
+		$str = "no files found";
 	}
 	return $str;
 }
-function getLastBackup(){
+
+function getLastBackup($option){
+	global $config;
+	$str = "unknown";
+
+	if($option=="fax"){
+		$str = getLastBackup2($config->fs_remote_file_fax, $config->ftp_file_fax);
+	}else if ($option=="config"){
+		$str = getLastBackup2($config->fs_remote_file_config, $config->ftp_file_config);
+	}
+
+	return $str;
+}
+
+function getLastBackup2($fs_remote_file, $server_filename){
 	global $config;
 	$str = "unknown";
 	$b = $config->use_ftp;
 	if($b==1){
 		$conn_id = openFtp();
-		$filename = $config->ftp_file;
-		$str = $filename . " " . getLastFileDateFtp($conn_id, $filename);
+		$str = $server_filename . " " . getLastFileDateFtp($conn_id, $server_filename);
 		closeFtp();
 	}else{
-		$filename = $config->fs_remote_file;
-		if(file_exists($filename)){
-			$str = $filename . " " . filemtime($filename);
+		if(file_exists($fs_remote_file)){
+			$str = $fs_remote_file . " " . filemtime($fs_remote_file);
 		}
 	}
 	return $str;
@@ -793,6 +1010,39 @@ function getNow(){
 function getDateFormat(){
 	$format = DATE_RFC822;
 	return $format;
+}
+
+
+// ############################### DEBUG
+
+
+function printDebug($txt){
+	global $config, $brnl;
+	if($config->debug){
+		echo "<span class=\"debug_text\">" . $txt . "</span>" . $brnl;
+	}
+}
+
+function printOut($txt, $option){
+	global $config, $brnl;
+	if($txt!=""){
+		if($option=="A"){
+			echo "<span class=\"debug_text\">Action: " . $txt . "</span>" . $brnl;
+		}else if($option=="E"){
+			echo "<span class=\"debug_text\">Error: " . $txt . "</span>" . $brnl;
+		}else if($option=="R"){
+			echo "<span class=\"cmd_out_text\">Output: " . $txt . "</span>" . $brnl;
+		}else{
+			printOut("Option $option is invalid", "E");
+		}
+	}
+}
+
+function printOutShell($cmd, $out){
+	if($out==""){
+		$out = "OK";
+	}
+	printOut("shell_exec " . $cmd . " --> " . $out, "A");
 }
 
 ?>
