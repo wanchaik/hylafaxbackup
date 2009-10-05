@@ -236,12 +236,16 @@ function backup_config(){
 		printOutArray($out_array);
 		$out2 = put_files($app->fs_local_file_config, $config->fs_remote_file_config, $config->ftp_file_config);
 		if($out2!=""){
-			printOut($out3, "R");
+			printOut($out2, "R");
 		}
-		$out3 = delAllTempFiles($app->fs_local_file_config);
+		$out3 = delAllTempFiles($app->fs_local_file_config_tar);
 		if($out3!=""){
 			printOut($out3, "R");
 		}
+		$out4 = delAllTempFiles($app->fs_local_file_config);
+		//if($out4!=""){
+		//	printOut($out4, "R");
+		//}
 	}else{
 		printOut("backup process could not start", "E");
 	}
@@ -263,10 +267,14 @@ function backup_fax(){
 		if($out2!=""){
 			printOut($out2, "R");
 		}
-		$out3 = delAllTempFiles($app->fs_local_file_fax);
+		$out3 = delAllTempFiles($app->fs_local_file_fax_tar);
 		if($out3!=""){
 			printOut($out3, "R");
 		}
+		//$out4 = delAllTempFiles($app->fs_local_file_fax);
+		//if($out4!=""){
+		//	printOut($out4, "R");
+		//}
 	}else{
 		printOut("backup process could not start", "E");
 	}
@@ -284,9 +292,16 @@ function printOutArray($out_array){
 // ##################################################################
 
 function delAllTempFiles($filename){
-	$cmd1 = "rm -f " . $filename;
-	$out1 = shell_exec($cmd1);
-	printOutShell($cmd1, $out1);
+	$out1 = "";
+	if(file_exists($filename)){
+		printOut("File to delete: $filename (" .  filesize($filename) . ") bytes", "R");
+		//sleep(3);
+		$cmd1 = "rm -f " . $filename;
+		$out1 = shell_exec($cmd1);
+		printOutShell($cmd1, $out1);
+	}else{
+		$out1 = "File $filename doesn't exist";
+	}
 	return $out1;
 }
 
@@ -324,13 +339,21 @@ function compress_files($option) {
 		printOut("Avantfax config files or dirs to backup: " .$n3, "A");
 
 		foreach($config->hylafax_config_files as $f){
-			$out1 = compress_file($f, $app->fs_local_file_config);
+			$out1 = compress_file($f, $app->fs_local_file_config_tar);
 			$array[] = $out1;
 		}
 
 		foreach($config->avantfax_config_files as $f){
-			$out3 = compress_file($f, $app->fs_local_file_config);
+			$out3 = compress_file($f, $app->fs_local_file_config_tar);
 			$array[] = $out3;
+		}
+
+		if(file_exists($app->fs_local_file_config_tar)){
+			//$cmd2 = "gzip -f " . $app->fs_local_file_config . " " . $app->fs_local_file_config_tar;
+			$cmd2 = "gzip -f " . $app->fs_local_file_config_tar . " >>" . $app->fs_local_file_config;
+			$out6 = shell_exec($cmd2);
+			printOutShell($cmd2, $out6);
+			$array[] = $out6;
 		}
 
 	}else if($option=="fax"){
@@ -342,16 +365,25 @@ function compress_files($option) {
 		printOut("Avantfax config files or dirs to backup: " .$n4, "R");
 
 		foreach($config->hylafax_data_files as $f){
-			$out2 = compress_file($f, $app->fs_local_file_fax);
+			$out2 = compress_file($f, $app->fs_local_file_fax_tar);
 			$array[] = $out2;
 		}
 
 		foreach($config->avantfax_data_files as $f){
-			$out4 = compress_file($f, $app->fs_local_file_fax);
+			$out4 = compress_file($f, $app->fs_local_file_fax_tar);
 			$array[] = $out4;
 		}
+
+		if(file_exists($app->fs_local_file_fax_tar)){
+			//$cmd1 = "gzip -f " . $app->fs_local_file_fax . " " . $app->fs_local_file_fax_tar;
+			$cmd1 = "gzip -f " . $app->fs_local_file_fax_tar . " >>" . $app->fs_local_file_fax;
+			$out5 = shell_exec($cmd1);
+			printOutShell($cmd1, $out5);
+			$array[] = $out5;
+		}
+
 	} else {
-		printOut("Invalid option " .$option, "E");
+		printOut("Invalid option " . $option, "E");
 	}
 
 	return $array;
@@ -359,21 +391,25 @@ function compress_files($option) {
 
 function compress_file($f, $filename){
 	$out1 = "";
-	if(($f!="") && (file_exists($f))){
-		$params = getTarParamsAdd($filename);
-		$cmd1 = "tar " . $params . " " . $filename . " " . $f;
-		$out1 = shell_exec($cmd1);
-		printOutShell($cmd1, $out1);
+	if( (($f!="") && (file_exists($f))) || (strpos($f, "*") !== false) ){
+		if( (is_readable($f)) || (strpos($f, "*") !== false) ){
+			$params = getTarParamsAdd($filename);
+			$cmd1 = "tar " . $params . " " . $filename . " " . $f;
+			$out1 = shell_exec($cmd1);
+			printOutShell($cmd1, $out1);
+		}else{
+			printOut("file $f not readable", "E");
+		}
 	}else{
 		printOut("file $f not found", "E");
 	}
 	return $out1;
 }
 
-function getTarParamsAdd($filename){
-	$param = "-czf";
-	if(file_exists($filename)){
-		$param = "-rzf";
+function getTarParamsAdd($f){
+	$param = "-cf";
+	if(file_exists($f)){
+		$param = "-rf";
 	}
 	return $param;
 }
@@ -388,7 +424,12 @@ function get_files($local_file, $remote_file, $server_file){
 		$ftp_user_name = $config->ftp_user;
 		$ftp_user_pass = $config->ftp_pass;
 		$conn_id = openFtp($ftp_server, $ftp_user_name, $ftp_user_pass);
-		$out = getFtp($conn_id, $local_file, $remote_file);
+		$b = getFtp($conn_id, $local_file, $remote_file);
+		if($b){
+			$out = "$server_file upload done";
+		}else{
+			$out = "$server_file upload error";
+		}
 		closeFtp($conn_id);
 	}else{
 		// copy from path to /temp
@@ -410,16 +451,23 @@ function put_files($local_file, $remote_file, $server_file){
 	if (file_exists($local_file)){
 		if($use_ftp){
 			// put from /temp to ftp
-			$ftp_server = $config->ftp_path;
+			$ftp_server = $config->ftp_host;
 			$ftp_user_name = $config->ftp_user;
 			$ftp_user_pass = $config->ftp_pass;
 			$conn_id = openFtp($ftp_server, $ftp_user_name, $ftp_user_pass);
-			$out = putFtp($conn_id, $local_file, $server_file);
+			$b = putFtp($conn_id, $local_file, $server_file);
+			if($b){
+				$out = "$server_file upload done";
+			}else{
+				$out = "$server_file upload error";
+			}
 			closeFtp($conn_id);
 		}else{
 			// copy from /temp to path
 			$cmd = "cp " . $local_file . " " . $remote_file;
 			$out = shell_exec($cmd);
+			printOutShell($cmd, $out);
+			$out = "copy done";
 		}
 	}else{
 		$out = "local file $local_file not found";
@@ -507,8 +555,8 @@ function check2($filename) {
 		$user = $config->ftp_user;
 		$pass = $config->ftp_pass;
 		$continue = checkIfFtpReady($host, $user, $pass);
-		if(!$b3){
-			//echo "Error: ftp server $host is not ready" . $brnl;
+		if(!$continue){
+			printOut("Error: ftp server $host is not ready or account is not valid", "E");
 		}
 	}
 	return $continue;
