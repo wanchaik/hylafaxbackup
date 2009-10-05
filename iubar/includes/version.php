@@ -50,20 +50,22 @@ class version {
 	public static function checkVersion($v1, $v2){
 		// formato xx.xx.xx
 		$r = 0;
-		$right1 = ($v1[7] / 10000) +  ($v1[6] / 1000) + ($v1[4] / 100) +  ($v1[3] / 10);
-		$right2 = ($v2[7] / 10000) +  ($v2[6] / 1000) + ($v2[4] / 100) +  ($v2[3] / 10);
-		$left1 = ($v1[0] * 10) + $v1[1];
-		$left2 = ($v2[0] * 10) + $v2[1];
+		if($v2!=""){
+			$right1 = ($v1[7] / 10000) +  ($v1[6] / 1000) + ($v1[4] / 100) +  ($v1[3] / 10);
+			$right2 = ($v2[7] / 10000) +  ($v2[6] / 1000) + ($v2[4] / 100) +  ($v2[3] / 10);
+			$left1 = ($v1[0] * 10) + $v1[1];
+			$left2 = ($v2[0] * 10) + $v2[1];
 
-		$ver1 = $left1 + $right1;
-		$ver2 = $left2 + $right2;
+			$ver1 = $left1 + $right1;
+			$ver2 = $left2 + $right2;
 
-		if(($ver1=="") && ($ver2>0)){
-			$r = 1;
-		}
+			if(($ver1=="") && ($ver2>0)){
+				$r = 1;
+			}
 
-		if( ($ver1<$ver2) && ($ver1>0) && ($ver2>0) ) {
-			$r = 1;
+			if( ($ver1<$ver2) && ($ver1>0) && ($ver2>0) ) {
+				$r = 1;
+			}
 		}
 		return $r;
 	}
