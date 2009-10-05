@@ -11,8 +11,9 @@ class app {
 	public $version_date = "31/09/2009";
 	public $url_update = "http://www.iubar.it/updates/hylafaxbackup/version.txt";
 
-	public $fs_local_file = "/tmp/hylafaxbackup.tgz";
-	public $sql_dump_file = "/tmp/avantfax_dump.sql";
+	public $fs_local_file_fax = "/tmp/hylafaxbackup_fax_and_data_tmp.tgz";
+	public $fs_local_file_config = "/tmp/hylafaxbackup_config_tmp.tgz";
+	public $sql_dump_file = "/tmp/avantfax_dump_tmp.sql";
 
 }
 
