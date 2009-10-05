@@ -39,17 +39,17 @@ function checkSocket($host, $port){
 }
 
 function openFtp($ftp_server, $ftp_user_name, $ftp_user_pass){
-	global $config;
 	// set up basic connection
 	$conn_id = ftp_connect($ftp_server);
 
-	// login with username and password
-	$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+	if($conn_id){
+		// login with username and password
+		$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
 
-	if ((!$conn_id) || (!$login_result)) {
-		//die("FTP connection has failed !");
+		if ((!$conn_id) || (!$login_result)) {
+			//die("FTP connection has failed !");
+		}
 	}
-
 	// print the current directory
 	//	echo ftp_pwd($conn_id);
 
@@ -59,12 +59,14 @@ function openFtp($ftp_server, $ftp_user_name, $ftp_user_pass){
 function putFtp($conn_id, $local_file, $remote_file){
 	// upload a file
 	$b = false;
-	if (ftp_put($conn_id, $remote_file, $local_file, FTP_BINARY)) {
-		//echo "successfully uploaded $file\n";
-		$b = true;
-	} else {
-		//echo "There was a problem while uploading $file\n";
-		$b = false;
+	if($conn_id){
+		if (ftp_put($conn_id, $remote_file, $local_file, FTP_BINARY)) {
+			//echo "successfully uploaded $file\n";
+			$b = true;
+		} else {
+			//echo "There was a problem while uploading $file\n";
+			$b = false;
+		}
 	}
 	return $b;
 }
@@ -72,12 +74,14 @@ function putFtp($conn_id, $local_file, $remote_file){
 function getFtp($conn_id, $local_file, $server_file){
 	// try to download $server_file and save to $local_file
 	$b = false;
-	if (ftp_get($conn_id, $local_file, $server_file, FTP_BINARY)) {
-		//echo "Successfully written to $local_file\n";
-		$b = true;
-	} else {
-		//echo "There was a problem\n";
-		$b = false;
+	if($conn_id){
+		if (ftp_get($conn_id, $local_file, $server_file, FTP_BINARY)) {
+			//echo "Successfully written to $local_file\n";
+			$b = true;
+		} else {
+			//echo "There was a problem\n";
+			$b = false;
+		}
 	}
 	return $b;
 }

@@ -19,14 +19,14 @@ class config {
 	public $ftp_host = "127.0.0.1";
 	public $ftp_user = "anonymous";
 	public $ftp_pass = "";
-	public $ftp_file_fax = "hylafaxbackup_fax_and_data.tgz";
-	public $ftp_file_config = "hylafaxbackup_config.tgz";
+	public $ftp_file_fax = "hylafaxbackup_fax_and_data.tar.gz";
+	public $ftp_file_config = "hylafaxbackup_config.tar.gz";
 	public $ftp_dir = "";
 
 	// FILE SYSTEM CONFIG
 
-	public $fs_remote_file_fax = "/tmp/hylafaxbackup_fax_and_data.tgz";
-	public $fs_remote_file_config = "/tmp/hylafaxbackup_config.tgz";
+	public $fs_remote_file_fax = "/tmp/hylafaxbackup_fax_and_data.tar.gz";
+	public $fs_remote_file_config = "/tmp/hylafaxbackup_config.tar.gz";
 
 	// DB CONFIG
 
@@ -67,8 +67,8 @@ class config {
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/config";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyS0";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/hosts.hfaxd";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/FaxNotify";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/FaxDispatch";
+
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/cover.templ";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/dialrules";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/templates/custom"; // dir
