@@ -33,30 +33,133 @@ function getLanIp(){
 	$ip = $_SERVER["SERVER_ADDR"];
 	return $ip;
 }
+
 function getHostName(){
 	$hostname = $_SERVER["SERVER_NAME"];
 	// $ip = $_SERVER["SERVER_NAME"]
 	//$hostname = gethostbyaddr($ip) . " - " . gethostbyname($ip);
 	return $hostname;
 }
-function getWanIp(){
+
+function getHostName2(){
+	$cmd = "hostname";
+	$hostname = shell_exec($cmd);
+	return $hostname;
+}
+
+function getServerAddr(){
 	$ip = $_SERVER["SERVER_ADDR"];
 	return $ip;
 }
 
-function seeyou(){
-// USAGE: //echo "Your Computer : ".seeyou();
-if (getenv("HTTP_CLIENT_IP") && strcasecmp(getenv("HTTP_CLIENT_IP"), "unknown"))
-	$ip = getenv("HTTP_CLIENT_IP");
-else if (getenv("HTTP_X_FORWARDED_FOR") && strcasecmp(getenv("HTTP_X_FORWARDED_FOR"), "unknown"))
-	$ip = getenv("HTTP_X_FORWARDED_FOR");
-else if (getenv("REMOTE_ADDR") && strcasecmp(getenv("REMOTE_ADDR"), "unknown"))
-	$ip = getenv("REMOTE_ADDR");
-else if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], "unknown"))
-	$ip = $_SERVER['REMOTE_ADDR'];
-else
+function getGatewayIp(){
 	$ip = "unknown";
-return gethostbyaddr($ip);
+	$cmd = "ip route show";
+	$out = shell_exec($cmd);
+	$find1 = "default via ";
+	$find2 = " dev";
+	$pos = strpos($out, $find1);
+	if ($pos !== false) {
+		 // echo "The string '$findme' was found in the string '$mystring' and exists at position $pos";
+		$start = $pos + strlen($find1);
+		$end = strrpos($out, $find2);
+		$length = $end - $start;
+		$ip = substr($out, $start,  $length);
+		// echo "start: $start end: $end length: $length id: $id";
+	} else {
+		$ip = "Unknown (the string '$find1' was not found in the string '$line')" . "<br/>";
+	}
+	return $ip;
+}
+
+function getESSID(){
+	$id = "unknown";
+	$cmd = "iwconfig wlan0";
+	$out = shell_exec($cmd);
+	$find = "ESSID:\"";
+	$pos = strpos($out, $find);
+	if ($pos !== false) {
+		 // echo "The string '$findme' was found in the string '$mystring' and exists at position $pos";
+		$start = $pos + strlen($find);
+		$end = strrpos($out, "\"");
+		$length = $end - $start;
+		$id = substr($out, $start,  $length);
+		// echo "start: $start end: $end length: $length id: $id";
+	} else {
+		// echo "(the string '$findme' was not found in the string '$mystring')";
+	}
+	return $id;
+}
+
+function getIpAddr($nic){
+	$ip = "unknown";
+	$cmd = "ip addr show | grep " . $nic;
+	$out = shell_exec($cmd);
+	$array = explode("\n", $out);
+	$line = $array[1];
+	$find1 = "inet ";
+	$find2 = " brd";
+	$pos = strpos($line, $find1);
+	if ($pos !== false) {
+		 // echo "The string '$findme' was found in the string '$mystring' and exists at position $pos";
+		$start = $pos + strlen($find1);
+		$end = strrpos($line, $find2);
+		$length = $end - $start;
+		$ip = substr($line, $start,  $length);
+		// echo "start: $start end: $end length: $length id: $id";
+	} else {
+		$ip = "Unknown (the string '$find1' was not found in the string '$line')" . "<br/>";
+	}
+	return $ip;
+}
+
+function getLanIpAddr(){
+	return getIpAddr("eth0");
+}
+
+function getWLanIpAddr(){
+	return getIpAddr("wlan0");
+}
+
+function getWanIp(){
+	$url = "http://www.iubar.it/tools/ip.php";
+	$content = file_get_contents($url);
+	return $content;
+}
+
+function getDns(){
+	$ip = "";
+	$cmd = "cat /etc/resolv.conf";
+	$out = shell_exec($cmd);
+	$array = explode("\n", $out);
+	foreach($array as $record){
+		$pos = strpos($record, "nameserver");
+		if ($pos !== false) {
+			$array2 = explode(" ", $record);
+			$last = count($array2) - 1;
+			if($ip!=""){
+				$ip = $ip . " - ";
+			}
+			$ip = $ip . $array2[$last];
+		}
+	}
+	return $ip;
+}
+
+
+function seeYou(){
+	// USAGE: //echo "Your Computer : ".seeyou();
+	if (getenv("HTTP_CLIENT_IP") && strcasecmp(getenv("HTTP_CLIENT_IP"), "unknown"))
+		$ip = getenv("HTTP_CLIENT_IP");
+	else if (getenv("HTTP_X_FORWARDED_FOR") && strcasecmp(getenv("HTTP_X_FORWARDED_FOR"), "unknown"))
+		$ip = getenv("HTTP_X_FORWARDED_FOR");
+	else if (getenv("REMOTE_ADDR") && strcasecmp(getenv("REMOTE_ADDR"), "unknown"))
+		$ip = getenv("REMOTE_ADDR");
+	else if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], "unknown"))
+		$ip = $_SERVER['REMOTE_ADDR'];
+	else
+		$ip = "unknown";
+	return gethostbyaddr($ip);
 }
 
 
