@@ -74,6 +74,9 @@ class config {
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/templates/custom"; // dir
 			$this->hylafax_config_files[] = "/var/spool/hylafax/bin/notify";
 			$this->hylafax_config_files[] = "/var/spool/hylafax/bin/faxrcvd";
+
+			$this->hylafax_config_files[] = "/var/www/html/iubar/hylafaxbackup/config.php";
+
 		}
 		if($this->hylafax_fax_backup==1){
 			$this->hylafax_data_files[] = $this->hylafax_recvq_path;
