@@ -202,7 +202,7 @@ function getHostFromUrl($url){
 function getCpuModel(){
 	$cmd = "grep \"model name\" /proc/cpuinfo";
 	$out = shell_exec($cmd);
-	$array = explode("\r", $out);
+	$array = explode("\n", $out);
 	$line = $array[0];
 	return $line;
 }
@@ -221,5 +221,68 @@ function getLastTimeReboot(){
 	//$d = $array2[$a] . " " . $array2[$b] . " " . $array2[$c];// . " " . $array2[$index-1];
 	return $first_line;
 }
+
+function searchAndReplace($file, $pattern, $replacement){
+	global $brnl;
+	if($pattern!=""){
+		if(!file_exists($file)) { // if file doesn't exist...
+			echo "The file $file doesn't seem to exist." . $brnl; // ...stop executing code.
+		} else { // if file exists...
+			if(is_writable($file)){
+				$f = file($file); // ...make new variable...
+				$content = ""; // ...and another...
+				$replacement2 = $pattern . "\t" . $replacement . "\n";
+				for($i = 0; $i < count($f); $i++) { // ...run through the loop...
+					$pos = strpos($f[$i], $pattern);
+					if ($pos !== false) {
+						$content .= $replacement2;
+						//print "Line replaced!!!";
+					} else { // the
+						$content .= $f[$i]; // content.
+					}
+				} // end for
+
+				if($content!=""){
+					$fi = fopen($file, "w"); // open specified file...
+					fwrite($fi, $content); // and rewrite it's content.
+					fclose($fi); // close file.
+				} // end if
+			} else	{
+				echo "The file $file doesn't seem to be writable." . $brnl; // ...stop executing code.
+			}
+		}
+	} else {
+		echo "pattern to find is empty"  . $brnl;
+	}
+} // end function
+
+
+function countFilesInDir($directory) {
+
+    // create an array to hold directory list
+    $results = array();
+
+    // create a handler for the directory
+    $handler = opendir($directory);
+
+    // keep going until all files in directory have been read
+    while ($file = readdir($handler)) {
+
+        // if $file isn't this directory or its parent,
+        // add it to the results array
+        if ($file != '.' && $file != '..')
+            $results[] = $file;
+    }
+
+    // tidy up: close the handler
+    closedir($handler);
+
+    // done!
+    //return $results;
+
+    $n = count($results);
+    return $n;
+}
+
 
 ?>
