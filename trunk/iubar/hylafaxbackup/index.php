@@ -80,29 +80,45 @@ function printLogs(){
 	$path = $config->hylafax_log_path;
 
 	if (is_readable($path)) {
-		//echo "The path $path is readable" . $brnl;
+		echo "Logs path: " . $path . $brnl;
 	} else {
 		echo "The path $path is not readable" . $brnl;
 	}
 
 	if (is_dir($path)) {
 		$i = 0;
-		echo "<p>Selezionare il file di log da analizzare</p>";
+		echo "<p>Chose the log file to analyze</p>";
 		echo "<form name=\"input\" action=\"#\" method=\"post\">";
 		//echo "<label for=\"field_log\">File di log: </label>";
 		echo "<select id=\"field_log\" name=\"logfile\" size=\"5\">";
 		$dh = opendir($path);
 		if ($dh) {
+			$narray = array();
 			while (($file = readdir($dh)) !== false) {
 				//echo "filename: $file : filetype: " . filetype($path . $file) . "\n";
-				if(is_file($path . "/" . $file)){
-					$i++;
-					echo "<option value=\"" . $file . "\">" . $file . "</option>";
+				$fullpath = $path . "/" . $file;
+				if(is_file($fullpath)){
+					if($file != '.' && $file != '..'){
+	       				if($file!="seqf"){
+	       					$narray[$i]=$file;
+	        				$i++;
+	        			}
+					}
+
 				}else{
 				 	//
 				}
 
+			} // end while
+
+			rsort($narray);
+			for($i=0;$i<sizeof($narray);$i++) {
+				$filename = $narray[$i];
+				$fullpath = $path . "/" . $filename;
+				$desc =  $filename . " (" . date ("F d Y H:i:s.", filemtime($fullpath)) . ")";
+				echo "<option value=\"" . $filename . "\">" . $desc . "</option>";
 			}
+
 			closedir($dh);
 		}
 		echo "</select>";
