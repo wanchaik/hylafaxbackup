@@ -4,7 +4,7 @@ class config {
 
 	// GLOBAL CONFIG
 
-	public $debug = 1;
+	public $debug = 0;
 	public $hylafax_fax_backup = 1;
 	public $hylafax_config_backup = 0;
 
@@ -27,6 +27,10 @@ class config {
 
 	public $fs_remote_file_fax = "/tmp/hylafaxbackup_fax_and_data.tar.gz";
 	public $fs_remote_file_config = "/tmp/hylafaxbackup_config.tar.gz";
+
+
+	//////////////////////////////////////////////////////////////////////
+
 
 	// DB CONFIG
 
@@ -65,6 +69,8 @@ class config {
 			$this->hylafax_config_files[] = "/etc/hylafax/hfaxd.conf";
 			$this->hylafax_config_files[] = "/etc/hylafax/hyla.conf";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/config";
+			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyACM0";
+			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyACM1";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyS0";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/hosts.hfaxd";
 			$this->hylafax_config_files[] = "/etc/hylafax/etc/FaxDispatch";

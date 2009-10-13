@@ -28,7 +28,7 @@ if(isset($_REQUEST["action"])){
 
 if($action == "saveconfig"){
 	saveconfig();
-	printOut("Config saved.", "A");
+	//printOut("Config saved.", "A");
 } else if($action == "config"){
 	printConfig();
 } else if($action == "update"){
@@ -64,7 +64,7 @@ printFooter2($app->project_name . " (ver " . $app->version . ")", $app->project_
 // #################################################################
 
 function saveconfig() {
-	printOut("TODO: function not ready in this version, please edit the file config.php", "W");
+	printOut("Function not ready in this version, please edit manually the file config.php", "W");
 }
 
 
@@ -115,7 +115,7 @@ function printLogs(){
 			for($i=0;$i<sizeof($narray);$i++) {
 				$filename = $narray[$i];
 				$fullpath = $path . "/" . $filename;
-				$desc =  $filename . " (" . date ("F d Y H:i:s.", filemtime($fullpath)) . ")";
+				$desc =  $filename . " (" . date(getDateFormat(), filemtime($fullpath)) . ")";
 				echo "<option value=\"" . $filename . "\">" . $desc . "</option>";
 			}
 
@@ -254,14 +254,10 @@ function backup_config(){
 		if($out2!=""){
 			printOut($out2, "R");
 		}
-		$out3 = delAllTempFiles($app->fs_local_file_config_tar);
-		if($out3!=""){
-			printOut($out3, "R");
-		}
 		$out4 = delAllTempFiles($app->fs_local_file_config);
-		//if($out4!=""){
-		//	printOut($out4, "R");
-		//}
+		if($out4!=""){
+			printOut($out4, "R");
+		}
 	}else{
 		printOut("backup process could not start", "E");
 	}
@@ -275,6 +271,8 @@ function backup_fax(){
 		if($b2){
 			// backup mysql
 			backup_db();
+			$out_array = compress_files("db");
+			printOutArray($out_array);						;
 		}
 
 		$out_array = compress_files("fax");
@@ -283,14 +281,16 @@ function backup_fax(){
 		if($out2!=""){
 			printOut($out2, "R");
 		}
-		$out3 = delAllTempFiles($app->fs_local_file_fax_tar);
-		if($out3!=""){
-			printOut($out3, "R");
+		$out4 = delAllTempFiles($app->fs_local_file_fax);
+		if($out4!=""){
+			printOut($out4, "R");
 		}
-		//$out4 = delAllTempFiles($app->fs_local_file_fax);
-		//if($out4!=""){
-		//	printOut($out4, "R");
-		//}
+		if($b2){
+			$out5 = delAllTempFiles($app->sql_dump_file);
+			if($out5!=""){
+				printOut($out5, "R");
+			}
+		}
 	}else{
 		printOut("backup process could not start", "E");
 	}
@@ -344,8 +344,12 @@ function compress_files($option) {
 
 	$array = array();
 
+	if($option=="db"){
 
-	if($option=="config"){
+		$out1 = compress_file($app->sql_dump_file, $app->fs_local_file_fax_tar);
+		$array[] = $out1;
+
+	}else if($option=="config"){
 
 
 		$n1 = count($config->hylafax_config_files);
@@ -641,7 +645,7 @@ function printConfig(){
 
 ?>
 
-<form name="myform" action="#?action=saveconfig" method="post">
+<form name="myform" action="./index.php?action=saveconfig" method="post">
 
 <h3>Options</h3>
 <label for="field11"></label><input id="field11" type="checkbox" name="hylafax_config_backup" <?php bool2checked($config->hylafax_config_backup); ?> disabled="disabled" />Hylafax config backup<br />
@@ -811,7 +815,7 @@ function getLastFaxOnDisk2(){
 	$extensions = array("tif", "pdf");
 	$filename = getHighestFileTimestamp2($path, $extensions);
 	if (file_exists($filename)) {
-		$str = $filename . " " . date (getDateFormat(), filemtime($filename));
+		$str = $filename . " (" . date (getDateFormat(), filemtime($filename)) . ")";
 	}else{
 		$str = "no files found";
 	}
@@ -841,7 +845,7 @@ function getLastBackup2($fs_remote_file, $server_filename){
 		closeFtp();
 	}else{
 		if(file_exists($fs_remote_file)){
-			$str = $fs_remote_file . " " . filemtime($fs_remote_file);
+			$str = $fs_remote_file . " (" . date(getDateFormat(), filemtime($fs_remote_file)) . ")";
 		}
 	}
 	return $str;
@@ -1073,6 +1077,7 @@ function getNow(){
 
 function getDateFormat(){
 	$format = DATE_RFC822;
+	//$format = "F d Y H:i:s.";
 	return $format;
 }
 
@@ -1094,6 +1099,8 @@ function printOut($txt, $option){
 			echo "<span class=\"debug_text\">Action: " . $txt . "</span>" . $brnl;
 		}else if($option=="E"){
 			echo "<span class=\"debug_text\">Error: " . $txt . "</span>" . $brnl;
+		}else if($option=="W"){
+			echo "<span class=\"debug_text\">Warning: " . $txt . "</span>" . $brnl;
 		}else if($option=="R"){
 			echo "<span class=\"cmd_out_text\">Output: " . $txt . "</span>" . $brnl;
 		}else{
