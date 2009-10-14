@@ -271,6 +271,10 @@ function backup_fax(){
 		if($b2){
 			// backup mysql
 			backup_db();
+
+			// sleep for 4 seconds
+			sleep(4);
+
 			$out_array = compress_files("db");
 			printOutArray($out_array);						;
 		}
@@ -498,9 +502,10 @@ function put_files($local_file, $remote_file, $server_file){
 function backup_db(){
 	global $config, $app;
 	$sql_dump_file = $app->sql_dump_file;
-	$cmd = "mysqldump --opt " . $config->db_name . " > " . $sql_dump_file . " -u " . $config->db_user . " -p " . $config->db_pass;
-	$output = shell_exec($cmd);
-	return $output;
+	$cmd = "mysqldump --opt " . $config->db_name . " > " . $sql_dump_file . " -u" . $config->db_user . " -p" . $config->db_pass;
+	$out = shell_exec($cmd);
+	printOutShell($cmd, $out);
+	return $out;
 }
 
 function restore_db(){
