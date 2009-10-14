@@ -1,5 +1,7 @@
 <?php
 
+;
+
 
 function getWebServerVersion(){
 	$sw = $_SERVER["SERVER_SOFTWARE"];
@@ -72,9 +74,9 @@ function getGatewayIp(){
 	return $ip;
 }
 
-function getESSID(){
+function getESSID($wlan){
 	$id = "unknown";
-	$cmd = "iwconfig wlan0";
+	$cmd = "iwconfig " . $wlan;
 	$out = shell_exec($cmd);
 	$find = "ESSID:\"";
 	$pos = strpos($out, $find);
@@ -113,38 +115,39 @@ function getIpAddr($nic){
 	return $ip;
 }
 
-function getLanIpAddr(){
-	return getIpAddr("eth0");
-}
-
-function getWLanIpAddr(){
-	return getIpAddr("wlan0");
-}
-
 function getWanIp(){
 	$url = "http://www.iubar.it/tools/ip.php";
-	$content = file_get_contents($url);
+	//ini_set("default_socket_timeout", 2);
+	$opts = array('http' => array('timeout' => 2)); // timeout 2 second
+	$ctx = stream_context_create($opts);
+	$content = file_get_contents($url, false, $ctx);
+
 	return $content;
 }
 
-function getDns(){
-	$ip = "";
-	$cmd = "cat /etc/resolv.conf";
+function getDnsServer($n){
+	global $brnl;
+	$dns = "";
+	$file = "/etc/resolv.conf";
+	$cmd = "cat $file";
 	$out = shell_exec($cmd);
 	$array = explode("\n", $out);
+	$found = 0;
 	foreach($array as $record){
 		$pos = strpos($record, "nameserver");
 		if ($pos !== false) {
+			$found++;
 			$array2 = explode(" ", $record);
 			$last = count($array2) - 1;
-			if($ip!=""){
-				$ip = $ip . " - ";
+			if($found==$n){
+				$dns = $array2[$last];
 			}
-			$ip = $ip . $array2[$last];
 		}
 	}
-	return $ip;
+	return $dns;
 }
+
+
 
 
 function seeYou(){
@@ -222,8 +225,9 @@ function getLastTimeReboot(){
 	return $first_line;
 }
 
-function searchAndReplace($file, $pattern, $replacement){
+function searchAndReplace($file, $pattern, $replacement, $replace_null){
 	global $brnl;
+	$b = false;
 	if($pattern!=""){
 		if(!file_exists($file)) { // if file doesn't exist...
 			echo "The file $file doesn't seem to exist." . $brnl; // ...stop executing code.
@@ -231,12 +235,27 @@ function searchAndReplace($file, $pattern, $replacement){
 			if(is_writable($file)){
 				$f = file($file); // ...make new variable...
 				$content = ""; // ...and another...
-				$replacement2 = $pattern . "\t" . $replacement . "\n";
+
+				$replacement2 = "";
+				$j = 0;
+				if (is_array($replacement)){
+					$replacement2 = $replacement[$j] . "\n";
+				}else{
+					$replacement2 = $replacement . "\n";
+				}
+
 				for($i = 0; $i < count($f); $i++) { // ...run through the loop...
 					$pos = strpos($f[$i], $pattern);
-					if ($pos !== false) {
+					if ( ($pos !== false) && ( (strlen($replacement2)>1) || ($replace_null) ) ) {
+
 						$content .= $replacement2;
+						$b = true;
 						//print "Line replaced!!!";
+						if (is_array($replacement)){
+							$j++;
+							$replacement2 = $replacement[$j] . "\n";
+						}
+
 					} else { // the
 						$content .= $f[$i]; // content.
 					}
@@ -247,6 +266,7 @@ function searchAndReplace($file, $pattern, $replacement){
 					fwrite($fi, $content); // and rewrite it's content.
 					fclose($fi); // close file.
 				} // end if
+
 			} else	{
 				echo "The file $file doesn't seem to be writable." . $brnl; // ...stop executing code.
 			}
@@ -254,8 +274,53 @@ function searchAndReplace($file, $pattern, $replacement){
 	} else {
 		echo "pattern to find is empty"  . $brnl;
 	}
+	return $b;
 } // end function
 
+
+function searchAndReplace2($file, $pattern, $replacement){
+	global $brnl;
+	$b2 = false;
+	$b = searchAndReplace($file, $pattern, $replacement, true);
+	if(!$b){
+		if (is_array($replacement)){
+			for($i = 0; $i < count($replacement); $i++){
+				$replacement2 = $replacement[$j] . "\n";
+				$b2 = append_file($file, $replacement2);
+			}
+		}else{
+			$replacement2 = $replacement . "\n";
+			$b2 = append_file($file, $replacement2);
+		}
+		if(!$b2){
+			echo "The file $file is NOT writable" . $brnl;
+		}
+	}
+}
+
+   function write_file($filename,$newdata) {
+          $f=fopen($filename,"w");
+          fwrite($f,$newdata);
+          fclose($f);
+   }
+
+function append_file($filename, $newdata) {
+	$b = false;
+	if(is_writable($filename)){
+		$f=fopen($filename,"a");
+		fwrite($f,$newdata);
+		fclose($f);
+		$b = true;
+	}
+	return $b;
+}
+
+   function read_file($filename) {
+          $f=fopen($filename,"r");
+          $data=fread($f,filesize($filename));
+          fclose($f);
+          return $data;
+   }
 
 function countFilesInDir($directory) {
 
@@ -282,6 +347,216 @@ function countFilesInDir($directory) {
 
     $n = count($results);
     return $n;
+}
+
+function getFirstValue($file, $pattern, $del_chars = array("\"", "'"), $end_char="\n") {
+	$value = "";
+	$values = getValue($file, $pattern, $del_chars, $end_char);
+	$n = count($values);
+	if($n>0){
+		$value = $values[0];
+	}
+	return $value;
+}
+
+function getLastValue($file, $pattern, $del_chars = array("\"", "'"), $end_char="\n") {
+	$value = "";
+	$values = getValue($file, $pattern, $del_chars, $end_char);
+	$n = count($values);
+	if($n>0){
+		$value = $values[($n-1)];
+	}
+	return $value;
+}
+
+function getValue($file, $pattern, $del_chars=array("\"", "'"), $end_char="\n") {
+	global $brnl;
+	$values = array();
+	if($file!=""){
+		if(file_exists($file)){
+			$bReadable = false;
+			if (is_readable($file)) {
+					//echo "File accessibile" . $nl;
+					$bReadable = true;
+			}else{
+					$txt = "The file " . $file . " is NOT readable";
+					echo $txt . $brnl;
+			}
+
+			if($bReadable){
+				$handle = @fopen($file, "r");
+				if ($handle) {
+					while (!feof($handle)) {
+						$buffer = fgets($handle, 4096);
+						$pos = strpos($buffer, $pattern);
+						if ($pos !== false) {
+							$start = $pos + strlen($pattern);
+							$end = strrpos($buffer, $end_char, $start);
+							if ($pos === false) { // note: three equal signs
+								$end = strrpos($buffer, "\n", $start);
+							}
+							$length = $end - $start;
+							$value = substr($buffer, $start,  $length);
+							$value = trim($value);
+							foreach($del_chars as $char){
+								$value = str_replace($char, "", $value);
+							}
+							$value = trim($value);
+							$values[] = $value;
+						}
+
+					}
+					fclose($handle);
+				}
+			} // end if
+		} else { // end if
+				$txt = "The file " . $file . " does NOT exist";
+				echo $txt . $brnl;
+		}
+	} // end if
+	return $values;
+} // end function
+
+
+function is_connected() {
+	//ini_set("default_socket_timeout", 3);
+    $connected = fsockopen("www.google.com", 80, $errno, $errstr, 2); // timeout 2 sec
+    if ($connected){
+        $is_conn = true;
+        fclose($connected);
+    }else{
+        $is_conn = false;
+    }
+    return $is_conn;
+
+}//end is_connected function
+
+
+function boolToString($n){
+	if($n>0){
+		$txt = "Yes";
+	}else{
+		$txt = "No";
+	}
+	return $txt;
+}
+
+function getWlanSignals(){
+	$r = array();
+	$cmd = "iwlist scan";
+	$out = shell_exec($cmd);
+	$r = getValueFromOutput($out, "Signal level=");
+	return $r;
+}
+
+function getWlanNetworks(){
+	$r = array();
+	$cmd = "iwlist scan";
+	$out = shell_exec($cmd);
+	$r = getValueFromOutput($out, "ESSID:");
+	return $r;
+}
+
+function getValueFromOutput($out, $pattern){
+	$values = array();
+	$array=explode("\n", $out);
+	foreach($array as $line){
+		$pos = strpos($line, $pattern);
+		if ($pos !== false) {
+			$start = $pos + strlen($pattern);
+			$end = strlen($line);
+			$length = $end - $start;
+			$value = substr($line, $start,  $length);
+			$value = trim($value);
+			$value = str_replace("\"", "", $value);
+			$value = str_replace("'", "", $value);
+			$values[] = $value;
+		}
+	}
+	return $values;
+}
+
+
+
+function printArray2($array){
+	$txt = "";
+	$i = 0;
+	foreach($array as $a){
+		if($i==0){
+			$txt = $a;
+		}else{
+			$txt = $txt . " - " . $a;
+		}
+		$i++;
+	}
+	return $txt;
+}
+
+function checkDns(){
+	$b = false;
+	$ip = "";
+
+	//$ip = gethostbyname("php.net");
+
+	$ip = getAddrByHost("php.net");
+	if($ip!=""){
+		$b=true;
+	}
+
+	/*
+	$result = dns_get_record("php.net");
+	if(sizeof($result)>0){
+		$index = sizeof($result) - 1;
+		//print_r($result[$index]);
+		$record1 = $result[$index];
+		if (isset($record1["ip"])){
+			$ip = $record1["ip"];
+			if($ip!=""){
+				$b = true;
+			}
+		}
+	}
+	*/
+
+	return $b;
+}
+
+function getAddrByHost($host, $timeout = 1) { // posso impostare il timeout a differenza di gethostbyname
+   $query = `nslookup -timeout=$timeout -retry=1 $host`;
+   if(preg_match('/\nAddress: (.*)\n/', $query, $matches)){
+      return trim($matches[1]);
+   }
+   return "";
+}
+
+function shutdown(){
+	global $brnl;
+	$cmd = "sudo shutdown -h now";
+
+	$last_line = system($cmd, $retval); // in alternativa exec($command, $output);
+
+	//echo "<p>";
+	//echo "Last line of the output: " . $last_line . $brnl;
+	//echo "Return value: " . $retval . $brnl;
+	//echo "</p>";
+
+	return $retval;
+}
+
+function reboot(){
+	global $brnl;
+	$cmd = "sudo reboot";
+	$cmd2 = "shutdown -r now";
+
+	$last_line = system($cmd, $retval); // in alternativa exec($command, $output);
+
+	//echo "<p>";
+	//echo "Last line of the output: " . $last_line . $brnl;
+	//echo "Return value: " . $retval . $brnl;
+	//echo "</p>";
+
+	return $retval;
+
 }
 
 
