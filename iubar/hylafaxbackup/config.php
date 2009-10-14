@@ -94,7 +94,7 @@ class config {
 
 		// AVANTFAX
 		if($this->avantfax_config_backup==1){
-			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/config.php";
+			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/local_config.php";
 			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/faxrcvd.php";
 			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/notify.php";
 		}
