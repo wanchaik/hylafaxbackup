@@ -511,7 +511,7 @@ function backup_db(){
 function restore_db(){
 	global $config, $app;
 	$sql_dump_file = $app->sql_dump_file;
-	$cmd = "mysql < " . $sql_dump_file . " -u " . $config->db_user . " -p " . $config->db_pass;
+	$cmd = "mysql < " . $sql_dump_file . " -u" . $config->db_user . " -p" . $config->db_pass;
 	$output = shell_exec($cmd);
 	return $output;
 }
