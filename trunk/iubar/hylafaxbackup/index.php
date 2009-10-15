@@ -231,8 +231,14 @@ function restore_fax(){
 				restore_db();
 			}
 			$out3 = delAllTempFiles($app->fs_local_file_fax);
-			if($out2!=""){
+			if($out3!=""){
 				printOut($out3, "R");
+			}
+			if($b3){
+				$out5 = delAllTempFiles($app->sql_dump_file);
+				if($out5!=""){
+					printOut($out5, "R");
+				}
 			}
 		}else{
 			printOut("files $app->fs_local_file_fax doesn't exist", "E");
@@ -276,7 +282,7 @@ function backup_fax(){
 			sleep(4);
 
 			$out_array = compress_files("db");
-			printOutArray($out_array);						;
+			printOutArray($out_array);
 		}
 
 		$out_array = compress_files("fax");
@@ -696,7 +702,7 @@ function printMenu(){
 <li><a href="?action=stats">Avantfax statistics</a></li>
 <li><a href="?action=operations">Backup/Restore</a></li>
 <li><a href="?action=logs">Hyalfax log files</a></li>
-<li><a href="?action=config">Configuration</a></li>
+<li><a href="?action=config">Backup config</a></li>
 <li><a href="?action=update">Check if a new version is available</a></li>
 <li><a href="?action=support">Request tech support</a></li>
 <li><a href="?action=main">Back to main page</a></li>
@@ -845,9 +851,9 @@ function getLastBackup2($fs_remote_file, $server_filename){
 	$str = "unknown";
 	$b = $config->use_ftp;
 	if($b==1){
-		$conn_id = openFtp();
+		$conn_id = openFtp($config->ftp_host, $config->ftp_user, $config->ftp_pass);
 		$str = $server_filename . " " . getLastFileDateFtp($conn_id, $server_filename);
-		closeFtp();
+		closeFtp($conn_id);
 	}else{
 		if(file_exists($fs_remote_file)){
 			$str = $fs_remote_file . " (" . date(getDateFormat(), filemtime($fs_remote_file)) . ")";
