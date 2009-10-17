@@ -234,38 +234,43 @@ function searchAndReplace($file, $pattern, $replacement, $replace_null){
 		} else { // if file exists...
 			if(is_writable($file)){
 				$f = file($file); // ...make new variable...
-				$content = ""; // ...and another...
 
-				$replacement2 = "";
-				$j = 0;
-				if (is_array($replacement)){
-					$replacement2 = $replacement[$j] . "\n";
-				}else{
-					$replacement2 = $replacement . "\n";
-				}
+				if($f){
 
-				for($i = 0; $i < count($f); $i++) { // ...run through the loop...
-					$pos = strpos($f[$i], $pattern);
-					if ( ($pos !== false) && ( (strlen($replacement2)>1) || ($replace_null) ) ) {
+					$content = ""; // ...and another...
 
-						$content .= $replacement2;
-						$b = true;
-						//print "Line replaced!!!";
-						if (is_array($replacement)){
-							$j++;
-							$replacement2 = $replacement[$j] . "\n";
-						}
-
-					} else { // the
-						$content .= $f[$i]; // content.
+					$replacement2 = "";
+					$j = 0;
+					if (is_array($replacement)){
+						$replacement2 = $replacement[$j] . "\n";
+					}else{
+						$replacement2 = $replacement . "\n";
 					}
-				} // end for
 
-				if($content!=""){
-					$fi = fopen($file, "w"); // open specified file...
-					fwrite($fi, $content); // and rewrite it's content.
-					fclose($fi); // close file.
-				} // end if
+					for($i = 0; $i < count($f); $i++) { // ...run through the loop...
+						$pos = strpos($f[$i], $pattern);
+						if ( ($pos !== false) && ( (strlen($replacement2)>1) || ($replace_null) ) ) {
+
+							$content .= $replacement2;
+							$b = true;
+							//print "Line replaced!!!";
+							if (is_array($replacement)){
+								$j++;
+								$replacement2 = $replacement[$j] . "\n";
+							}
+
+						} else { // the
+							$content .= $f[$i]; // content.
+						}
+					} // end for
+
+					if($content!=""){
+						$fi = fopen($file, "w"); // open specified file...
+						fwrite($fi, $content); // and rewrite it's content.
+						fclose($fi); // close file.
+					} // end if
+
+				}
 
 			} else	{
 				echo "The file $file doesn't seem to be writable." . $brnl; // ...stop executing code.
@@ -282,6 +287,7 @@ function searchAndReplace2($file, $pattern, $replacement){
 	global $brnl;
 	$b2 = false;
 	$b = searchAndReplace($file, $pattern, $replacement, true);
+	// Se non trovo nulla, allora aggiungo in coda
 	if(!$b){
 		if (is_array($replacement)){
 			for($i = 0; $i < count($replacement); $i++){
@@ -350,7 +356,7 @@ function countFilesInDir($directory) {
 }
 
 function getFirstValue($file, $pattern, $del_chars = array("\"", "'"), $end_char="\n") {
-	$value = "";
+	$value = "null";
 	$values = getValue($file, $pattern, $del_chars, $end_char);
 	$n = count($values);
 	if($n>0){
@@ -360,7 +366,7 @@ function getFirstValue($file, $pattern, $del_chars = array("\"", "'"), $end_char
 }
 
 function getLastValue($file, $pattern, $del_chars = array("\"", "'"), $end_char="\n") {
-	$value = "";
+	$value = "null";
 	$values = getValue($file, $pattern, $del_chars, $end_char);
 	$n = count($values);
 	if($n>0){

@@ -2,6 +2,7 @@
 
 function initBarChart($title, $funct_name, $div_name, $columns, $array, $color, $w, $h){
 	global $nl;
+
 ?>
 
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
