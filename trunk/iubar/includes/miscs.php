@@ -411,5 +411,96 @@ function writeConfig($pattern, $value){
 }
 
 
+function getFilesFromDir($path){
+		$narray = array();
+		if (is_dir($path)) {
+			$dh = opendir($path);
+			if ($dh) {
+				$i=0;
+				while (($file = readdir($dh)) !== false) {
+					//echo "filename: $file : filetype: " . filetype($path . $file) . "\n";
+					$fullpath = $path . "/" . $file;
+					if(is_file($fullpath)){
+						if($file != '.' && $file != '..'){
+							$narray[$i]=$file;
+							$i++;
+						}
+
+					}else{
+						//
+					}
+
+				} // end while
+
+				closedir($dh);
+			}
+		}
+		return $narray;
+}
+
+function getLastMonths($n){
+	$array = array();
+	$today_time = time();
+	$month_current = getMonthNum($today_time);
+	$year_current = getYear($today_time);
+	$bDone = false;
+	$year = $year_current;
+
+	$d2 = $month_current;
+	$d3 = $n;
+
+	while(!$bDone){
+		$m_start = 0;
+		$m_end = 0;
+		$diff = $d2 - $d3;
+		if($diff<=0){
+			$m_start = 1;
+			$m_end = $d2;
+			$d2 = 12;
+			$d3 = $diff * -1; // cambio il segno
+		} else {
+			$m_start = $diff;
+			if($year == $year_current){
+				$m_end = $month_current;
+			}else{
+				$m_end = 12;
+			}
+			$bDone = true;
+		}
+		$array["$year"] = array($m_start, $m_end);
+		if($diff<=0){
+			$year = $year - 1;
+		}
+	} // end while
+
+	// Il passo successivo....
+
+	$months = array();
+
+	foreach ($array as $year=>$r){
+		$array2 = array();
+		$start = $r[0];
+		$end = $r[1];
+		for ($i = $start; $i <= $end; $i++) {
+			$array2[] = $i;
+		}
+		$months["$year"] = $array2;
+	}
+	ksort($months);
+
+	return $months;
+}
+
+function getMonthNum($date){
+	$month = 0;
+    $month =  date("n", $date);
+	return $month;
+}
+
+function getYear($date){
+	$month = 0;
+    $month =  date("Y", $date);
+	return $month;
+}
 
 ?>
