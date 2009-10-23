@@ -2,7 +2,6 @@
 
 function initBarChart($title, $funct_name, $div_name, $columns, $array, $color, $w, $h){
 	global $nl;
-
 ?>
 
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
@@ -19,11 +18,15 @@ function initBarChart($title, $funct_name, $div_name, $columns, $array, $color, 
        	 echo "data.addColumn('$value', '$key');" . $nl;
 	}
     echo "data.addRows(" . count($array) . ");" . $nl;
-	$i=0;
-	foreach ($array as $key => $value){
-       	 echo "data.setValue($i, 0, '$key');" . $nl;
-	     echo "data.setValue($i, 1, " . toValue($value) . ");" . $nl;
-		 $i++;
+	$i = 0;
+	foreach ($array as $key => $array2){
+		echo "data.setValue($i, 0, '$key');" . $nl;
+		$j = 1;
+		foreach ($array2 as $value){
+		    echo "data.setValue($i, $j, " . toValue($value) . ");" . $nl;
+		 	$j++;
+		}
+		$i++;
 	}
 ?>
 
@@ -56,11 +59,15 @@ function initColumnsChart($title, $funct_name, $div_name, $columns, $array, $col
        	 echo "data.addColumn('$value', '$key');" . $nl;
 	}
     echo "data.addRows(" . count($array) . ");" . $nl;
-	$i=0;
-	foreach ($array as $key => $value){
-       	 echo "data.setValue($i, 0, '$key');" . $nl;
-	     echo "data.setValue($i, 1, " . toValue($value) . ");" . $nl;
-		 $i++;
+	$i = 0;
+	foreach ($array as $key => $array2){
+		echo "data.setValue($i, 0, '$key');" . $nl;
+		$j = 1;
+		foreach ($array2 as $value){
+		    echo "data.setValue($i, $j, " . toValue($value) . ");" . $nl;
+		 	$j++;
+		}
+		$i++;
 	}
 ?>
 

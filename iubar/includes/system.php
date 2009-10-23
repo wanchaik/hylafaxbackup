@@ -329,29 +329,34 @@ function append_file($filename, $newdata) {
    }
 
 function countFilesInDir($directory) {
-
+	$n = 0;
     // create an array to hold directory list
     $results = array();
 
-    // create a handler for the directory
-    $handler = opendir($directory);
+	if(is_readable($directory)){
+		// create a handler for the directory
+		$handler = opendir($directory);
+		if($handler){
+			// keep going until all files in directory have been read
+			while ($file = readdir($handler)) {
 
-    // keep going until all files in directory have been read
-    while ($file = readdir($handler)) {
+				// if $file isn't this directory or its parent,
+				// add it to the results array
+				if ($file != '.' && $file != '..')
+					$results[] = $file;
+			}
 
-        // if $file isn't this directory or its parent,
-        // add it to the results array
-        if ($file != '.' && $file != '..')
-            $results[] = $file;
-    }
+			// tidy up: close the handler
+			closedir($handler);
+		}
+		// done!
+		//return $results;
+		$n = count($results);
+	}else{
+		$n = -1;
+	}
 
-    // tidy up: close the handler
-    closedir($handler);
 
-    // done!
-    //return $results;
-
-    $n = count($results);
     return $n;
 }
 
