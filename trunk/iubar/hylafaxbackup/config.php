@@ -6,9 +6,9 @@ class config {
 
 	public $debug = 0;
 	public $hylafax_fax_backup = 1;
-	public $hylafax_config_backup = 0;
+	public $hylafax_config_backup = 1;
 
-	public $avantfax_config_backup = 0;
+	public $avantfax_config_backup = 1;
 	public $avantfax_fax_backup = 1;
 	public $avantfax_db_dump = 1;
 
@@ -97,6 +97,12 @@ class config {
 			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/local_config.php";
 			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/faxrcvd.php";
 			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/includes/notify.php";
+			// COVERS
+			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/images/cover-letter.ps";
+			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/images/coverpage.html";
+			$this->avantfax_config_files[] = $this->avantfax_install_dir . "/images/cover.ps";
+
+
 		}
 		if($this->avantfax_fax_backup==1){
 			$this->avantfax_recvd_dir = $this->avantfax_install_dir . "/faxes/recvd";
