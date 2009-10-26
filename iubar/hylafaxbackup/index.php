@@ -737,23 +737,16 @@ function getHylafaxVersion(){
 	$ver = $tokens[2];
 	return $ver;
 }
+
 function getAvantfaxVersion(){
 	global $config, $brnl;
 	$ver = "unknown";
 	$file = "";
 	$f9 = "/includes/config.php";
 	$f0 = $config->avantfax_install_dir . $f9;
-	$f1 = "/var/www/html/avantfax" . $f9;
-	$f2 = "/var/www/avantfax" . $f9;
 	if (file_exists($f0)) {
 		//echo "The file $f0 exist";
-		$file = $f2;
-	} else if (file_exists($f1)) {
-		//echo "The file $f1 exists";
-		$file = $f1;
-	} else if (file_exists($f2)) {
-		//echo "The file $f2 exist";
-		$file = $f2;
+		$file = $f0;
 	}
 
 	if($file!=""){
@@ -771,9 +764,12 @@ function getAvantfaxVersion(){
 				while (!feof($handle)) {
 					$buffer = fgets($handle, 4096);
 					if(strpos($buffer, "AVANTFAX_VERSION")>0){
-						$tokens = explode(" ", $buffer);
-						$ver = $tokens[2];
+						$tokens = explode("=", $buffer);
+						$ver = trim($tokens[1]);
+						$ver = str_replace("'", "", $ver);
+						$ver = str_replace(";", "", $ver);
 						//echo "buffer: " . $buffer . $brnl;
+						break 1;
 					}
 
 				}
