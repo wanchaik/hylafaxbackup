@@ -66,8 +66,137 @@ printFooter2($app->project_name . " (ver " . $app->version . ")", $app->project_
 
 // #################################################################
 
+
+function toBoolean($str){
+	$n = 0;
+	if(trim($str)=="on"){
+		$n = 1;
+	}
+	return $n;
+}
+
 function saveconfig() {
-	printOut("Function not ready in this version, please edit manually the file config.php", "W");
+	global $brnl;
+
+	$file = "config.php";
+
+	//printOut("Function not ready in this version, please edit manually the file config.php", "W");
+
+
+	$pattern1 = "\$hylafax_fax_backup";
+	$pattern2 = "\$hylafax_config_backup";
+
+	$pattern3 = "\$avantfax_config_backup";
+	$pattern4 = "\$avantfax_fax_backup";
+	$pattern5 = "\$avantfax_db_dump";
+
+	$pattern6 = "\$use_ftp";
+
+	// FTP CONFIG
+
+	$pattern7 = "\$ftp_host";
+	$pattern8 = "\$ftp_user";
+	$pattern9 = "\$ftp_pass";
+	$pattern10 = "\$ftp_file_fax";
+	$pattern11 = "\$ftp_file_config";
+	$pattern12 = "\$ftp_dir";
+
+	// FILE SYSTEM CONFIG
+
+	$pattern13 = "\$fs_remote_file_fax";
+	$pattern14 = "\$fs_remote_file_config";
+
+	if(isset($_REQUEST["hylafax_fax_backup"])){ // OK
+		$value = toBoolean($_REQUEST["hylafax_fax_backup"]);
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern1 . " = " . $value . ";";
+		searchAndReplace2($file, $pattern1, $line);
+	}
+	if(isset($_REQUEST["hylafax_config_backup"])){ // OK
+		$value = toBoolean($_REQUEST["hylafax_config_backup"]);
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern2 . " = " . $value . ";";
+		searchAndReplace2($file, $pattern2, $line);
+	}
+	if(isset($_REQUEST["avantfax_config_backup"])){ // OK
+		$value = toBoolean($_REQUEST["avantfax_config_backup"]);
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern3 . " = " . $value . ";";
+		searchAndReplace2($file, $pattern3, $line);
+	}
+	if(isset($_REQUEST["avantfax_fax_backup"])){ // OK
+		$value = toBoolean($_REQUEST["avantfax_fax_backup"]);
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern4 . " = " . $value . ";";
+		searchAndReplace2($file, $pattern4, $line);
+	}
+	if(isset($_REQUEST["avantfax_db_dump"])){ // OK
+		$value = toBoolean($_REQUEST["avantfax_db_dump"]);
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern5 . " = " . $value . ";";
+		searchAndReplace2($file, $pattern5, $line);
+	}
+	if(isset($_REQUEST["group1"])){ // OK
+		$value = $_REQUEST["group1"];
+		if($value=="ftp"){
+			$value = 1;
+		}else{
+			$value = 0;
+		}
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern6 . " = " . $value . ";";
+		searchAndReplace2($file, $pattern6, $line);
+	}
+	if(isset($_REQUEST["ftp_host"])){ // OK
+		$value = $_REQUEST["ftp_host"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern7 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern7, $line);
+	}
+	if(isset($_REQUEST["ftp_user"])){ // OK
+		$value = $_REQUEST["ftp_user"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern8 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern8, $line);
+	}
+	if(isset($_REQUEST["ftp_pass"])){ // OK
+		$value = $_REQUEST["ftp_pass"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern9 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern9, $line);
+	}
+	if(isset($_REQUEST["XXXX"])){
+		$value = $_REQUEST["XXXX"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern10 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern10, $line);
+	}
+	if(isset($_REQUEST["XXXX"])){
+		$value = $_REQUEST["XXXX"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern11 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern11, $line);
+	}
+	if(isset($_REQUEST["XXXX"])){
+		$value = $_REQUEST["XXXX"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern12 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern12, $line);
+	}
+	if(isset($_REQUEST["XXXX"])){
+		$value = $_REQUEST["XXXX"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern13 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern13, $line);
+	}
+	if(isset($_REQUEST["XXXX"])){
+		$value = $_REQUEST["XXXX"];
+		//echo "Saving $value..." . $brnl;
+		$line = "\tpublic " . $pattern14 . " = \"" . $value . "\";";
+		searchAndReplace2($file, $pattern14, $line);
+	}
+
+	//print_r($_REQUEST);
 }
 
 
@@ -656,11 +785,11 @@ function printConfig(){
 <form name="myform" action="./index.php?action=saveconfig" method="post">
 
 <h3>Options</h3>
-<label for="field11"></label><input id="field11" type="checkbox" name="hylafax_config_backup" <?php bool2checked($config->hylafax_config_backup); ?> disabled="disabled" />Hylafax config backup<br />
-<label for="field12"></label><input id="field12" type="checkbox" name="hylafax_fax_backup" <?php bool2checked($config->hylafax_fax_backup); ?> disabled="disabled" />Hylafax fax backup<br />
-<label for="field13"></label><input id="field13" type="checkbox" name="avantfax_config_backup" <?php bool2checked($config->avantfax_config_backup); ?> disabled="disabled" />Avantfax config backup<br />
-<label for="field14"></label><input id="field14" type="checkbox" name="avantfax_db_dump" <?php bool2checked($config->avantfax_db_dump); ?> disabled="disabled" />Avantfax data (db) dump<br />
-<label for="field15"></label><input id="field15" type="checkbox" name="avantfax_fax_backup" <?php bool2checked($config->avantfax_fax_backup); ?> disabled="disabled" />Avantfax fax backup<br />
+<label for="field11"></label><input id="field11" type="checkbox" name="hylafax_config_backup" <?php bool2checked($config->hylafax_config_backup); ?> />Hylafax config backup<br />
+<label for="field12"></label><input id="field12" type="checkbox" name="hylafax_fax_backup" <?php bool2checked($config->hylafax_fax_backup); ?> />Hylafax fax backup<br />
+<label for="field13"></label><input id="field13" type="checkbox" name="avantfax_config_backup" <?php bool2checked($config->avantfax_config_backup); ?> />Avantfax config backup<br />
+<label for="field14"></label><input id="field14" type="checkbox" name="avantfax_db_dump" <?php bool2checked($config->avantfax_db_dump); ?> />Avantfax data (db) dump<br />
+<label for="field15"></label><input id="field15" type="checkbox" name="avantfax_fax_backup" <?php bool2checked($config->avantfax_fax_backup); ?> />Avantfax fax backup<br />
 
 <h3>Db Authentication</h3>
 <label for="field30">Db host: </label><input id="field30" type="text" name="db_host" value="<?php echo $config->db_host; ?>" disabled="disabled" /><br />
