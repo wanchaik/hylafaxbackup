@@ -228,6 +228,7 @@ function getLastTimeReboot(){
 function searchAndReplace($file, $pattern, $replacement, $replace_null){
 	global $brnl;
 	$b = false;
+	echo "Searching for $pattern ...." . $brnl;
 	if($pattern!=""){
 		if(!file_exists($file)) { // if file doesn't exist...
 			echo "The file $file doesn't seem to exist." . $brnl; // ...stop executing code.
@@ -246,9 +247,10 @@ function searchAndReplace($file, $pattern, $replacement, $replace_null){
 					}else{
 						$replacement2 = $replacement . "\n";
 					}
-
+					$pos = 1;
 					for($i = 0; $i < count($f); $i++) { // ...run through the loop...
 						$pos = strpos($f[$i], $pattern);
+						//echo "Pattern: $pattern - Pos: $pos - Line: $f[$i]" . $brnl;
 						if ( ($pos !== false) && ( (strlen($replacement2)>1) || ($replace_null) ) ) {
 
 							$content .= $replacement2;
@@ -278,6 +280,11 @@ function searchAndReplace($file, $pattern, $replacement, $replace_null){
 		}
 	} else {
 		echo "pattern to find is empty"  . $brnl;
+	}
+	if($b){
+		//echo "....$pattern found" . $brnl;
+	}else{
+		//echo "....$pattern NOT found" . $brnl;
 	}
 	return $b;
 } // end function
