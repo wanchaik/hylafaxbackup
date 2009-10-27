@@ -63,7 +63,6 @@ printMenu();
 
 printFooter2($app->project_name . " (ver " . $app->version . ")", $app->project_home);
 
-
 // #################################################################
 
 
