@@ -1,8 +1,5 @@
 <?php
 
-;
-
-
 function getWebServerVersion(){
 	$sw = $_SERVER["SERVER_SOFTWARE"];
 	return $sw;
@@ -547,6 +544,15 @@ function getAddrByHost($host, $timeout = 1) { // posso impostare il timeout a di
    return "";
 }
 
+function lastreboot(){
+	global $brnl;
+	$cmd = "last reboot | head -1";
+	$last_line = system($cmd, $retval); // in alternativa exec($command, $output);
+	$array = explode("\t", $last_line);
+	$str_date = $array[3];
+	return $str_date;
+}
+
 function shutdown(){
 	global $brnl;
 	$cmd = "sudo shutdown -h now";
@@ -562,11 +568,14 @@ function shutdown(){
 }
 
 function reboot(){
+
 	global $brnl;
 	$cmd = "sudo reboot";
-	$cmd2 = "shutdown -r now";
+	$cmd2 = "sudo shutdown -r now"; // no
 
-	$last_line = system($cmd, $retval); // in alternativa exec($command, $output);
+	$last_line = system($cmd, $retval);
+	// in alternativa
+	// exec($cmd, $retval);
 
 	//echo "<p>";
 	//echo "Last line of the output: " . $last_line . $brnl;

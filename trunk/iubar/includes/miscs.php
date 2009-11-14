@@ -274,6 +274,41 @@ function getExtension($filename){
 	return $ext;
 }
 
+function getFilename($fullpath){
+	$filename = "";
+	if($fullpath!=""){
+		$filename = basename($fullpath);
+		$array = explode(".", $filename);
+		//$array2 = array_pop($array);
+		//$filename = implode(".", $array2);
+		$filename = $array[0];
+	}
+	return $filename;
+}
+
+function getFilenamePhp52($fullpath){
+	$filename = "";
+	if($fullpath){
+		$path_parts = pathinfo($fullpath);
+		$filename = $path_parts['filename'];
+
+		//echo $path_parts['dirname'], "\n";
+		//echo $path_parts['basename'], "\n";
+		//echo $path_parts['extension'], "\n";
+		//echo $path_parts['filename'], "\n"; // since PHP 5.2.0
+
+	}
+	return $filename;
+}
+
+function getScriptFilename(){
+	return getFilename($_FILES['File']['name']);
+}
+
+function getScriptFilenamePhp52(){
+	return getFilenamePhp52($_FILES['File']['name']);
+}
+
 function getDirSize($path) {
     $result = explode("\t",exec("du -hs ".$path),2);
     return ($result[1]==$path ? $result[0] : "error");
