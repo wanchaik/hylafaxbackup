@@ -65,19 +65,25 @@ class config {
 
 		// HYLAFAX
 		if($this->hylafax_config_backup==1){
-			$this->hylafax_config_files[] = "/etc/hylafax/faxcover.ps";
-			$this->hylafax_config_files[] = "/etc/hylafax/hfaxd.conf";
-			$this->hylafax_config_files[] = "/etc/hylafax/hyla.conf";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/config";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyACM0";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyACM1";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/config.ttyS0";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/hosts.hfaxd";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/FaxDispatch";
 
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/cover.templ";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/dialrules";
-			$this->hylafax_config_files[] = "/etc/hylafax/etc/templates/custom"; // dir
+			$dir1 = "/etc/hylafax/";
+			$dir2 = "/etc/hylafax/etc/"; 	// Only for Redhat/Centos/Fedora
+			//$dir2 = $dir1;				// Only for Debian/Ubuntu
+
+			$this->hylafax_config_files[] = $dir1. "faxcover.ps";
+			$this->hylafax_config_files[] = $dir1. "hfaxd.conf";
+			$this->hylafax_config_files[] = $dir1. "hyla.conf";
+
+			$this->hylafax_config_files[] = $dir2. "config";
+			$this->hylafax_config_files[] = $dir2. "config.ttyACM0";
+			$this->hylafax_config_files[] = $dir2. "config.ttyACM1";
+			$this->hylafax_config_files[] = $dir2. "config.ttyS0";
+			$this->hylafax_config_files[] = $dir2. "hosts.hfaxd";
+			$this->hylafax_config_files[] = $dir2. "FaxDispatch";
+			$this->hylafax_config_files[] = $dir2. "cover.templ";
+			$this->hylafax_config_files[] = $dir2. "dialrules";
+			$this->hylafax_config_files[] = $dir2. "templates/custom"; // dir
+
 			$this->hylafax_config_files[] = "/var/spool/hylafax/bin/notify";
 			$this->hylafax_config_files[] = "/var/spool/hylafax/bin/faxrcvd";
 
