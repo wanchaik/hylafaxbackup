@@ -90,7 +90,10 @@ function getFtp($conn_id, $local_file, $server_file){
 
 function closeFtp($conn_id){
 	// close this connection
-	$result = ftp_close($conn_id);
+	$result = false;
+	if($conn_id){
+		$result = ftp_close($conn_id);
+	}
 	return $result;
 }
 
@@ -110,14 +113,16 @@ function setDirFtp($conn_id, $dir) {
 function getLastFileDateFtp($conn_id, $file){
 	$date = "unknown";
 	//  get the last modified time
-	$buff = ftp_mdtm($conn_id, $file);
+	if($conn_id){
+		$buff = ftp_mdtm($conn_id, $file);
 
-	if ($buff!=-1) {
-		// somefile.txt was last modified on: March 26 2003 14:16:41.
-		//echo "$file was last modified on : " . date("F d Y H:i:s.", $buff);
-		$date = date(getDateFormat(), $buff);
-	} else {
-		echo "Couldn't get mdtime";
+		if ($buff!=-1) {
+			// somefile.txt was last modified on: March 26 2003 14:16:41.
+			//echo "$file was last modified on : " . date("F d Y H:i:s.", $buff);
+			$date = date(getDateFormat(), $buff);
+		} else {
+			echo "Couldn't get mdtime";
+		}
 	}
 	return $date;
 }
@@ -132,10 +137,10 @@ function checkIfFtpReady($ftp_server, $ftp_user_name, $ftp_user_pass) {
 		if($b3){
 			$b = true;
 		}else{
-			echo "Error: login fail on ftp server $host with user $user" . $brnl;
+			echo "Error: login fail on ftp server $ftp_server with user $ftp_user_name" . $brnl;
 		}
 	}else{
-		echo "Error: ftp server $host is not ready" . $brnl;
+		echo "Error: ftp server $ftp_server is not ready" . $brnl;
 	}
 	return $b;
 }

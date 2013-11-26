@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('Europe/Rome');
+
 class config {
 
 	// GLOBAL CONFIG
@@ -18,7 +20,7 @@ class config {
 
 	public $ftp_host = "127.0.0.1";
 	public $ftp_user = "anonymous";
-	public $ftp_pass = "";
+	public $ftp_pass = "password";
 	public $ftp_file_fax = "hylafaxbackup_fax_and_data.tar.gz";
 	public $ftp_file_config = "hylafaxbackup_config.tar.gz";
 	public $ftp_dir = "";
@@ -31,6 +33,9 @@ class config {
 
 	//////////////////////////////////////////////////////////////////////
 
+
+	public $apache_home = "/var/www/html"; 	// FOR CENTOS
+//	public $apache_home = "/var/www";		// FOR DEBIAN
 
 	// DB CONFIG
 
@@ -63,6 +68,8 @@ class config {
 
 	public function __construct() {
 
+		$this->avantfax_install_dir = $this->apache_home . "/avantfax";
+
 		// HYLAFAX
 		if($this->hylafax_config_backup==1){
 
@@ -76,7 +83,7 @@ class config {
 
 			$this->hylafax_config_files[] = $dir2. "config";
 			$this->hylafax_config_files[] = $dir2. "config.ttyACM0";
-			$this->hylafax_config_files[] = $dir2. "config.ttyACM1";
+			// $this->hylafax_config_files[] = $dir2. "config.ttyACM1";
 			$this->hylafax_config_files[] = $dir2. "config.ttyS0";
 			$this->hylafax_config_files[] = $dir2. "hosts.hfaxd";
 			$this->hylafax_config_files[] = $dir2. "FaxDispatch";
@@ -87,7 +94,7 @@ class config {
 			$this->hylafax_config_files[] = "/var/spool/hylafax/bin/notify";
 			$this->hylafax_config_files[] = "/var/spool/hylafax/bin/faxrcvd";
 
-			$this->hylafax_config_files[] = "/var/www/html/iubar/hylafaxbackup/config.php";
+			$this->hylafax_config_files[] = $this->apache_home . "/iubar/hylafaxbackup/config.php";
 
 		}
 		if($this->hylafax_fax_backup==1){

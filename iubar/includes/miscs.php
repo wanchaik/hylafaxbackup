@@ -35,6 +35,17 @@ function csv2array2($filename, $limit=0, $sep=" "){
 	return $array;
 }
 
+
+function bool2text($b){
+	$txt = "no";
+	if($b){
+		$txt = "yes";
+	}
+	return $txt;
+}
+
+/*
+
 function getAdminPassword(){
 	$str = "";
 	$pattern = "\$adminpassword";
@@ -63,17 +74,8 @@ function canByPass(){
 	return $str;
 }
 
-function bool2text($b){
-	$txt = "no";
-	if($b){
-		$txt = "yes";
-	}
-	return $txt;
-}
 
-
-
-function readConfig($pattern){
+function readConfig($pattern){ // Utilizzato da DansGuardian
 	$str = "";
 	$path = getScriptPath();
 	$file = "/var/www/html/iubar/config.php";
@@ -140,6 +142,7 @@ function writeConfig($pattern, $value){
 
 }
 
+*/
 
 //############################################################## FILE
 

@@ -650,6 +650,7 @@ function restore_db(){
 
 function check1($fs_remote_file, $ftp_file) {
 	global $config;
+	$continue = false;
 	if (!($config->use_ftp)) {
 		// check if file to restore is present.....
 		$b1 = false;
@@ -1212,12 +1213,11 @@ function openDb(){
 
 function printErrorStats(){
 
-global $brnl, $errors;
+global $brnl, $errors, $config;
 
 $array = array();
-$dir = "/etc/hylafax/log";
-
-$narray = getFilesFromDir($dir);
+$hylafax_log_path = $config->hylafax_log_path;
+$narray = getFilesFromDir($hylafax_log_path);
 
 
 
@@ -1233,7 +1233,7 @@ $log_errors_tot = array();				// #4 filename->keys_array
 if(count($narray)>0){
 		for($k=0;$k<sizeof($narray);$k++) {
 
-			$fullpath = $dir . "/" . $narray[$k];
+			$fullpath = $hylafax_log_path . "/" . $narray[$k];
 
 			$array_error_key = array();
 			$log_errors_temp = array();
@@ -1572,9 +1572,9 @@ printChart($div_name);
 
 
 echo "<hr />";
-$n = countFilesInDir($dir);
+$n = countFilesInDir($hylafax_log_path);
 echo "<div>";
-echo "Total logs file in $dir: " . $n . "<br />";
+echo "Total logs file in $hylafax_log_path: " . $n . "<br />";
 echo "Fax numbers detected in log files: " . count($array_num) . "<br />";
 //print_r($array_num);
 echo "Fax numbers which cause some errors: " . count($array_num2) . "<br />";
