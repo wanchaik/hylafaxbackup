@@ -33,7 +33,7 @@ function getLanIp(){
 	return $ip;
 }
 
-function getHostName(){
+function getHostName3(){
 	$hostname = $_SERVER["SERVER_NAME"];
 	// $ip = $_SERVER["SERVER_NAME"]
 	//$hostname = gethostbyaddr($ip) . " - " . gethostbyname($ip);
@@ -337,7 +337,7 @@ function countFilesInDir($directory) {
     // create an array to hold directory list
     $results = array();
 
-	if(is_readable($directory)){
+	if(is_readable($directory)) {
 		// create a handler for the directory
 		$handler = opendir($directory);
 		if($handler){
@@ -358,6 +358,7 @@ function countFilesInDir($directory) {
 		$n = count($results);
 	}else{
 		$n = -1;
+		//echo "Warning: dir $directory is not readable<br/>";
 	}
 
 
